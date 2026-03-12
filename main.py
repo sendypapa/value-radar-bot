@@ -28,45 +28,74 @@ def get_accurate_stocks():
     return stock_data
 
 def find_best_model(client):
-    """2026년 최신 문법으로 사용 가능한 최적의 모델을 찾습니다."""
+    """2026년 최신 문법으로 모든 Flash-Lite 후보군을 검색합니다."""
     try:
-        # 지원하는 액션 중 generateContent가 있는 모델만 추출
+        # 1. 현재 주문 가능한 모델 리스트 싹 긁어오기
         available = [m.name for m in client.models.list() if 'generateContent' in m.supported_actions]
-        # 3.1 -> 3 -> 2.5 순서로 검색
-        for priority in ['gemini-3.1', 'gemini-3', 'gemini-2.5', 'gemini-2.5-lite']:
-            target = [name for name in available if priority in name and 'flash' in name]
+        
+        # [노부장님 추천 적용] 2.5 Flash Lite까지 포함한 우선순위 리스트
+        # 한도가 가장 넉넉한 3.1부터 순서대로 찾습니다.
+        priorities = [
+            'gemini-3.1-flash-lite', 
+            'gemini-3.1-flash', 
+            'gemini-3-flash-lite', 
+            'gemini-2.5-flash-lite', # 노부장님 추천 종목 추가!
+            'gemini-2.5-flash'
+        ]
+        
+        for priority in priorities:
+            target = [name for name in available if priority in name]
             if target:
+                print(f"🎯 최적의 엔진 발견: {target[0]}")
                 return target[0]
+        
         return available[0] if available else "gemini-2.0-flash"
-    except:
+    except Exception as e:
+        print(f"🚨 모델 검색 중 오류: {e}")
         return "gemini-2.0-flash"
 
+from datetime import datetime
+
 def generate_report(client, model_name, name, price):
-    # [수정] 정중하고 간결한 리포트를 위한 프롬프트
-    prompt = f"""
-    당신은 전문 주식 애널리스트입니다. 종목명 {name}, 전일 확정 종가 {price:,.0f}원에 대해 리포트를 작성하세요.
-    메시지의 시작은 
-    "안녕하세요 밸류레이더 노부장입니다.
-    (날짜)금일 단기 공략주 공유드립니다." 로 시작하고, 
-    마지막에는
-    "반드시 1~5일 지켜봐주시기 바랍니다.
-    별도 매도신호는 나가지 않습니다.
-    단기 추천 종목인 만큼 3~5% 이상 수익이 나시면
-    익절로 대응하시는 걸 추천드립니다.
-    오늘도 성투를 빌겠습니다"
-    로 마무리할 것.
+    # 1. 파이썬에서 오늘 날짜 확정
+    today_date = datetime.now().strftime('%m월 %d일')
     
-    [작성 가이드라인]
-    1. 반드시 정중하되 따듯한 존댓말을 사용할 것.
-    2. 1~3일 단기 매매 관점에서 핵심 매수 전략만 제안할 것.
-    3. 매수의견, 비중, 구체적인 타점(매수/익절/손절)을 불렛포인트로 요약할 것.
-    4. 전체 분량은 8~10줄 내외로 아주 간결하게 작성할 것.
-    5. '자네', '껄껄' 등 비격식적인 표현은 절대 금지.
+    # 2. AI에게는 '알맹이'만 작성하도록 프롬프트 최적화
+    # 특수문자(*, _, #)를 쓰지 말고 순수 텍스트로만 달라고 명시합니다.
+    prompt = f"""
+    당신은 전문 주식 애널리스트입니다. 
+    종목명: {name}, 전일 종가: {price:,.0f}원
+    
+    [작성 지침]
+    - 반드시 정중하고 따뜻한 존댓말로 작성할 것.
+    - 1~3일 단기 매매 관점에서 '매수의견, 투자비중, 매수타점, 익절가, 손절가'를 핵심만 작성할 것.
+    - 마크다운 기호(예: **, _, #)를 절대 사용하지 말고 순수 텍스트와 줄바꿈으로만 구성할 것.
+    - 전체 분량은 6~7줄 이내로 아주 간결하게 작성할 것.
     """
     
-    response = client.models.generate_content(model=model_name, contents=prompt)
-    return response.text
-
+    try:
+        response = client.models.generate_content(model=model_name, contents=prompt)
+        ai_content = response.text
+        
+        # 3. 노부장님이 원하시는 고정 문구를 앞뒤로 결합 (안정성 100%)
+        # HTML 태그 <b>(굵게) 등을 활용해 깔끔하게 정리합니다.
+        final_report = (
+            f"안녕하세요 밸류레이더 노부장입니다.\n"
+            f"<b>{today_date} 금일 단기 공략주 공유드립니다.</b>\n\n"
+            f"📌 <b>[{name} 분석 리포트]</b>\n"
+            f"{ai_content}\n\n"
+            f"반드시 1~5일 지켜봐주시기 바랍니다.\n"
+            f"별도 매도신호는 나가지 않습니다.\n"
+            f"단기 추천 종목인 만큼 3~5% 이상 수익이 나시면\n"
+            f"익절로 대응하시는 걸 추천드립니다.\n"
+            f"오늘도 성투를 빌겠습니다."
+        )
+        return final_report
+        
+    except Exception as e:
+        print(f"AI 리포트 생성 실패: {e}")
+        return f"리포트 생성 중 오류가 발생했습니다. (종목: {name})"
+        
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"}

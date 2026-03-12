@@ -14,12 +14,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: 2026년 최신 도구 설치
+      - name: 2026년형 도구 설치
         run: |
           python -m pip install --upgrade pip
-          # 구형(generativeai)은 버리고 신형(genai)만 설치합니다.
           pip install -U google-genai finance-datareader requests pandas
-      - name: 로봇 실행
+      - name: 로봇 가동
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}

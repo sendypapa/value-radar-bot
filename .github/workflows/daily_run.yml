@@ -2,17 +2,16 @@ name: Value Radar Bot
 
 on:
   schedule:
-    # 한국 시간 기준 오전 8시 15분 (UTC 23:15)
     - cron: '15 23 * * *'
-  workflow_dispatch: # 수동 실행 버튼
+  workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4  # v3에서 v4로 업그레이드
       - name: Python 세팅
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5 # v4에서 v5로 업그레이드
         with:
           python-version: '3.9'
       - name: 필수 도구 설치

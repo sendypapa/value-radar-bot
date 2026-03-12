@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Python 3.11 세팅
+      - name: Python 3.12 세팅
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # 안정적인 3.11 버전으로 고정
+          python-version: '3.12'
       - name: 2026년 최신 도구 설치
         run: |
           pip install --upgrade pip

@@ -81,8 +81,8 @@ def generate_report(client, model_name, name, price):
         # HTML 태그 <b>(굵게) 등을 활용해 깔끔하게 정리합니다.
         final_report = (
             f"안녕하세요 밸류레이더 노부장입니다.\n"
-            f"<b>{today_date} 금일 단기 공략주 공유드립니다.</b>\n\n"
-            f"📌 <b>[{name} 분석 리포트]</b>\n"
+            f"{today_date} 금일 단기 공략주 공유드립니다.\n\n"
+            f"📌 [{name} 분석 리포트]\n"
             f"{ai_content}\n\n"
             f"반드시 1~5일 지켜봐주시기 바랍니다.\n"
             f"별도 매도신호는 나가지 않습니다.\n"

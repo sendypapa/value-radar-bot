@@ -16,8 +16,7 @@ jobs:
           python-version: '3.9'
       - name: 필수 도구 설치
         run: |
-          # [수정] -U 를 붙여서 항상 최신 버전으로 설치합니다
-          pip install -U finance-datareader google-generativeai requests pandas
+          pip install -U finance-datareader google-genai requests pandas
       - name: 로봇 실행
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}

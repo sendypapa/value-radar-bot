@@ -3,49 +3,47 @@ import FinanceDataReader as fdr
 import requests
 import os
 import time
+from datetime import datetime
 
 # 깃허브 시크릿 데이터
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-def get_target_stocks():
-    df = fdr.StockListing('KOSDAQ')
-    # 시총 1,000억 ~ 6,000억 사이 필터링 (10개 종목 집중)
-    filtered = df[(df['Marcap'] >= 100000000000) & (df['Marcap'] <= 600000000000)]
-    return filtered.sort_values(by='Amount', ascending=False).head(10)
-
-def find_best_model(client):
-    """2026년 최신 문법으로 사용 가능한 모델을 검색합니다."""
-    print("🔍 노부장님의 전용 모델 리스트 검색 중...")
-    try:
-        # [2026년형 문법] supported_actions를 확인하여 사용 가능한 모델 추출
-        available_models = []
-        for m in client.models.list():
-            if hasattr(m, 'supported_actions') and 'generateContent' in m.supported_actions:
-                available_models.append(m.name)
-        
-        # 3.1 -> 3 -> 2.5 순서로 가장 좋은 모델 선택
-        for priority in ['gemini-3.1', 'gemini-3', 'gemini-2.5', 'gemini-2']:
-            for name in available_models:
-                if priority in name and 'flash' in name:
-                    print(f"🎯 최적 엔진 발견: {name}")
-                    return name
-        
-        if available_models:
-            print(f"⚠️ 우선순위 모델이 없어 {available_models[0]}을(를) 선택합니다.")
-            return available_models[0]
-        return "models/gemini-2.0-flash" # 최후의 보루
-    except Exception as e:
-        print(f"🚨 리스트 검색 중 오류(v1 고수): {e}")
-        return "gemini-2.0-flash"
-
-def generate_opinion(client, model_name, name, price):
-    prompt = f"주식 전문가 노부장 말투로, {name}(종가 {price:,.0f}원)의 1~3일 단타 매수의견, 비중, 타점을 아주 구체적으로 작성해줘."
+def get_accurate_stock_data():
+    """코스닥 상위 10개 종목의 정확한 전일 종가를 가져옵니다."""
+    df_list = fdr.StockListing('KOSDAQ')
+    # 시총 1,000억 ~ 6,000억 사이 필터링
+    filtered = df_list[(df_list['Marcap'] >= 100000000000) & (df_list['Marcap'] <= 600000000000)]
+    top_10 = filtered.sort_values(by='Amount', ascending=False).head(10)
     
-    # 2026년형 표준 호출
+    result = []
+    for _, row in top_10.iterrows():
+        symbol = row['Code']
+        name = row['Name']
+        # DataReader를 통해 가장 최근의 정확한 종가 한 줄을 가져옵니다.
+        price_df = fdr.DataReader(symbol).tail(1)
+        close_price = price_df['Close'].iloc[0]
+        result.append({'name': name, 'price': close_price})
+    return result
+
+def generate_opinion(name, price):
+    client = genai.Client(api_key=GEMINI_API_KEY, http_options={'api_version': 'v1'})
+    
+    # [수정] 정중한 말투와 간결한 분량을 요구하는 프롬프트
+    prompt = f"""
+    너는 전문 주식 애널리스트야. 종목명 {name}, 전일 확정 종가 {price:,.0f}원에 대해 리포트를 작성해줘.
+    
+    [작성 규칙]
+    1. 반드시 정중한 존댓말을 사용할 것.
+    2. 1~3일 단기 매매 관점으로 작성할 것.
+    3. 매수 의견, 비중, 구체적인 타점(매수/익절/손절)을 핵심만 간결하게 불렛포인트로 작성할 것.
+    4. 전체 분량은 10줄 내외로 짧게 요약할 것.
+    5. '자네', '껄껄' 같은 표현은 절대 사용하지 말 것.
+    """
+    
     response = client.models.generate_content(
-        model=model_name,
+        model='models/gemini-3.1-flash-lite', 
         contents=prompt
     )
     return response.text
@@ -57,32 +55,26 @@ def send_telegram(text):
 
 if __name__ == "__main__":
     try:
-        # 정식 도로(v1)로 접속
-        client = genai.Client(api_key=GEMINI_API_KEY, http_options={'api_version': 'v1'})
+        stocks = get_accurate_stock_data()
+        print(f"🚀 [밸류레이더] 정밀 분석 시작: {len(stocks)}개 종목 ---")
         
-        # 내 계정에 상장된 최적의 모델 찾기
-        target_model = find_best_model(client)
-        
-        stocks = get_target_stocks()
-        print(f"🚀 [밸류레이더] {target_model} 엔진으로 10개 종목 분석 시작!")
-        
-        for i, (_, row) in enumerate(stocks.iterrows()):
-            name = row['Name']
-            price = row['Close']
+        for i, stock in enumerate(stocks):
+            name = stock['name']
+            price = stock['price']
             try:
-                # 15초 간격으로 429 에러 완벽 차단
+                # RPM 15 한도 준수를 위한 12초 대기
                 if i > 0:
-                    print(f"안전 수익 구간 대기 중... ({i+1}/10) 15초 뒤 분석")
-                    time.sleep(15) 
+                    time.sleep(12) 
                 
-                opinion = generate_opinion(client, target_model, name, price)
-                message = f"🚀 **단기 공략주: {name}**\n- **전일 종가**: {price:,.0f}원\n\n{opinion}"
+                opinion = generate_opinion(name, price)
+                # 메시지 레이아웃 정리
+                message = f"📢 **[밸류레이더] 오늘의 단기 공략주**\n\n🔹 **종목명**: {name}\n🔹 **전일 종가**: {price:,.0f}원\n\n{opinion}"
                 send_telegram(message)
-                print(f"✅ {name} 전송 성공!")
+                print(f"✅ {name} (종가: {price:,.0f}) 전송 성공!")
                 
             except Exception as e:
-                print(f"❌ {name} 에러: {e}")
-                time.sleep(20)
+                print(f"❌ {name} 실패: {e}")
+                time.sleep(15)
                 
     except Exception as e:
         print(f"🚨 시스템 오류: {e}")

@@ -1,0 +1,26 @@
+name: Value Radar Bot
+
+on:
+  schedule:
+    # 한국 시간 기준 오전 8시 15분 (UTC 23:15)
+    - cron: '15 23 * * *'
+  workflow_dispatch: # 수동 실행 버튼
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Python 세팅
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: 필수 도구 설치
+        run: |
+          pip install finance-datareader google-generativeai requests pandas
+      - name: 로봇 실행
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python main.py

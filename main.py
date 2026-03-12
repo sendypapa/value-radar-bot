@@ -33,7 +33,7 @@ def find_best_model(client):
         # 지원하는 액션 중 generateContent가 있는 모델만 추출
         available = [m.name for m in client.models.list() if 'generateContent' in m.supported_actions]
         # 3.1 -> 3 -> 2.5 순서로 검색
-        for priority in ['gemini-3.1', 'gemini-3', 'gemini-2.5']:
+        for priority in ['gemini-3.1', 'gemini-3', 'gemini-2.5', 'gemini-2.5-lite']:
             target = [name for name in available if priority in name and 'flash' in name]
             if target:
                 return target[0]

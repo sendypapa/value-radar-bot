@@ -2,24 +2,34 @@ name: Value Radar Bot
 
 on:
   schedule:
-    - cron: '15 23 * * *' # 한국 시간 오전 8시 15분
-  workflow_dispatch:
+    # 한국 시간 기준 오전 8시 15분 자동 실행 (UTC 23:15)
+    - cron: '15 23 * * *'
+  workflow_dispatch: # 수동으로 [Run workflow] 버튼을 누를 수 있게 해줍니다.
 
 jobs:
   run-bot:
+    # 최신 운영체제 사용
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
-      - name: Python 3.12 세팅
+      # 1. 소스코드 가져오기 (최신 v4 버전)
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 파이썬 환경 세팅 (안정적인 3.11 버전 & 최신 v5 액션)
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-      - name: 2026년 최신 도구 설치
+          python-version: '3.11'
+
+      # 3. 필수 도구 설치 (최신 버전 강제 업데이트)
+      - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          # 최신 google-genai 라이브러리 설치
-          pip install -U google-genai finance-datareader requests pandas
-      - name: 로봇 실행
+          python -m pip install --upgrade pip
+          pip install -U finance-datareader google-generativeai requests pandas
+
+      # 4. 로봇 실행 (금고에 저장된 열쇠들을 꺼내서 사용)
+      - name: Run Stock Bot
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}

@@ -5,19 +5,18 @@ on:
     - cron: '15 23 * * *'
   workflow_dispatch:
 
-# 아래 permissions 섹션을 추가했습니다!
-permissions:
-  contents: read
-  actions: write
+# [핵심] 로봇에게 모든 권한을 강제로 부여합니다.
+permissions: write-all
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
+      # [수정] 신분증을 확실히 들고 들어가게 세팅했습니다.
       - name: Checkout code
-        uses: actions/checkout@v4 # 여기서 에러가 났던 부분입니다.
+        uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5

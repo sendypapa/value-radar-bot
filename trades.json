@@ -159,5 +159,68 @@
         "tp": 13161,
         "sl": 11931,
         "expected_profit": 7.0
+    },
+    {
+        "date": "03월 13일",
+        "name": "퀄리타스반도체",
+        "symbol": "432720",
+        "buy_price": 14000,
+        "tp": 15000,
+        "sl": 13580,
+        "expected_profit": 7.14
+    },
+    {
+        "date": "03월 13일",
+        "name": "와이지-원",
+        "symbol": "019210",
+        "buy_price": 13790,
+        "tp": 14750,
+        "sl": 13370,
+        "expected_profit": 6.96
+    },
+    {
+        "date": "03월 13일",
+        "name": "RF시스템즈",
+        "symbol": "474610",
+        "buy_price": 10100,
+        "tp": 10800,
+        "sl": 9800,
+        "expected_profit": 6.93
+    },
+    {
+        "date": "03월 13일",
+        "name": "라이콤",
+        "symbol": "388790",
+        "buy_price": 5440,
+        "tp": 5820,
+        "sl": 5270,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "03월 13일",
+        "name": "제이엘케이",
+        "symbol": "322510",
+        "buy_price": 9000,
+        "tp": 9630,
+        "sl": 8730,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "03월 13일",
+        "name": "파인엠텍",
+        "symbol": "441270",
+        "buy_price": 11020,
+        "tp": 11791,
+        "sl": 10690,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "03월 13일",
+        "name": "폴라리스오피스",
+        "symbol": "041020",
+        "buy_price": 5100,
+        "tp": 5450,
+        "sl": 4940,
+        "expected_profit": 6.86
     }
 ]

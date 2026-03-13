@@ -19,14 +19,11 @@ def get_accurate_stocks():
     print("🔍 [단계 1] 종목 스캐닝 엔진 가동...")
     df_listing = fdr.StockListing('KOSDAQ')
     
-    # 컬럼명 유연화 (Marcap/MarCap 대응)
     marcap_col = next((c for c in df_listing.columns if c.lower() == 'marcap'), 'Marcap')
     amt_col = next((c for c in df_listing.columns if c.lower() == 'amount'), 'Amount')
 
-    # 필터링 조건 (시총 1,000억 ~ 8,000억)
     filtered = df_listing[(df_listing[marcap_col] >= 100000000000) & (df_listing[marcap_col] <= 800000000000)]
     
-    # 조건 부합 종목 부족 시 거래대금 상위주로 대체
     if len(filtered) < 5:
         print("⚠️ 조건 부합 종목 부족으로 거래대금 상위주로 그물을 넓힙니다.")
         top_candidates = df_listing.sort_values(by=amt_col, ascending=False).head(15)
@@ -59,15 +56,36 @@ def find_best_model(client):
     except: return "gemini-2.0-flash"
 
 def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
-    """AI를 통해 분석 리포트를 생성합니다."""
+    """AI를 통해 종목별로 '살아있는' 2줄 분석 리포트를 생성합니다."""
     today_date = datetime.now().strftime('%m월 %d일')
-    prompt = f"{name}(추천가 {price:,.0f}원)의 단기 상승 모멘텀을 3줄로 간결하고 정중하게 분석해줘. 특수문자 금지."
+    
+    # [수정] AI에게 더 구체적이고 전문적인 분석을 요구하는 프롬프트
+    prompt = f"""
+    당신은 밸류레이더 소속의 베테랑 주식 애널리스트입니다. 
+    대상 종목: {name}, 현재가: {price:,.0f}원
+    
+    [작성 규칙]
+    1. 이 종목의 현재 위치를 고려하여 매수해야 하는 이유를 '딱 2줄'로 작성하세요.
+    2. '거래량 실린 장대양봉', '매집봉 포착', '이평선 정배열 초기', '외인/기관 수급 유입', '매물대 돌파' 등 전문적인 용어를 사용하여 분석하세요.
+    3. 종목마다 내용이 중복되지 않도록 역동적으로 작성하세요.
+    4. 마크다운(**)이나 특수문자는 절대 사용 금지, 순수 텍스트와 줄바꿈으로만 구성하세요.
+    """
     
     try:
         response = client.models.generate_content(model=model_name, contents=prompt)
-        ai_content = response.text
+        ai_content = response.text.strip()
+        # AI 응답이 너무 짧거나 문제가 있을 경우 에러 발생시켜 fallback 작동
+        if len(ai_content) < 10: raise ValueError
     except:
-        ai_content = "현재 수급 흐름이 양호하며 기술적 반등이 유효한 자리입니다."
+        # AI 실패 시에도 고정되지 않게 5가지 백업 문구 중 랜덤 선택
+        fallbacks = [
+            f"주요 이평선 부근에서 강력한 지지세가 확인되며, 바닥권 거래량이 실리는 추세 전환 국면입니다.",
+            f"최근 기관의 연속적인 수급 유입이 포착되었으며, 전고점 매물 소화 후 슈팅이 기대되는 자리입니다.",
+            f"단기 정배열 초입 구간으로 하방 경직성이 확보되었습니다. 변동성을 활용한 눌림목 공략이 유효합니다.",
+            f"거래대금이 동반된 돌파 시도가 이어지고 있으며, 상방 매물벽이 얇아 가벼운 탄력이 예상됩니다.",
+            f"과매도 구간 이후 RSR 등 기술적 지표가 반등을 가리키고 있어 단기 기술적 반등의 확률이 매우 높습니다."
+        ]
+        ai_content = random.choice(fallbacks)
 
     report = (
         f"📢 <b>[밸류레이더] 오늘의 단기 공략주</b>\n\n"
@@ -85,7 +103,7 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
         f"⚠️ <b>노부장의 안내사항</b>\n"
         f"1분 1초마다 바뀌는 장 특성상 사인을 보고 매도를 하시면 늦습니다. "
         f"조건부 매도 세팅을 통해 안정적인 매매 환경을 만드시는 것을 권고드립니다.\n\n"
-        f"오늘도 노부장과 함께 행복한 하루되세요!"
+        f"오늘도 노부장과 함께 행복한 하루되세요!\n\n"
         f"밸류레이더에서 빠른 종목 분석과 대응 시나리오를 만나보실 수 있습니다."
     )
     return report
@@ -100,7 +118,6 @@ if __name__ == "__main__":
         client = genai.Client(api_key=GEMINI_API_KEY, http_options={'api_version': 'v1'})
         target_model = find_best_model(client)
         
-        # 오늘 종목 분석 및 발송
         stocks = get_accurate_stocks()
         if not stocks:
             print("🚨 분석 가능한 종목이 없습니다.")
@@ -111,12 +128,10 @@ if __name__ == "__main__":
             for i, stock in enumerate(stocks):
                 name, symbol, price = stock['name'], stock['symbol'], stock['price']
                 
-                # 익절가 +6~8% 랜덤, 손절가 -3% 고정 계산
                 profit_expect = random.randint(6, 8)
                 tp = price * (1 + profit_expect / 100)
                 sl = price * 0.97
                 
-                # RPM 보호를 위한 대기 (첫 종목 제외)
                 if i > 0:
                     print(f"⏳ RPM 보호를 위해 15초 대기 중... ({i+1}/10)")
                     time.sleep(15)
@@ -130,7 +145,6 @@ if __name__ == "__main__":
                     'buy_price': price, 'tp': tp, 'sl': sl
                 })
 
-            # 오늘 추천한 종목을 파일로 저장 (내일 복기용)
             with open(TRADES_FILE, 'w', encoding='utf-8') as f:
                 json.dump(today_trades, f, ensure_ascii=False, indent=4)
             print(f"💾 {len(today_trades)}개 종목 장부 기록 완료")

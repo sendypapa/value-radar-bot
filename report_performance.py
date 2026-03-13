@@ -10,13 +10,19 @@ TRADES_FILE = "trades.json"
 
 
 def send_telegram(text):
+
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"}
-    
+
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": text,
+        "parse_mode": "HTML"
+    }
+
     try:
         requests.post(url, json=payload, timeout=10)
     except:
-        print("텔레그램 전송 실패")
+        print("🚨 텔레그램 전송 실패")
 
 
 def calculate_month_stats(trades):
@@ -56,7 +62,7 @@ def run_performance_check():
         return
 
     try:
-        with open(TRADES_FILE, 'r', encoding='utf-8') as f:
+        with open(TRADES_FILE, "r", encoding="utf-8") as f:
             trades = json.load(f)
     except:
         print("🚨 장부 파일 읽기 실패.")
@@ -65,28 +71,33 @@ def run_performance_check():
     if not trades:
         return
 
-    trade_date = trades[0].get('date', '이전')
+    today = datetime.now().strftime("%m월 %d일")
 
-    header = f"📢 <b>{trade_date} 매매 결과 리포트</b>\n------------------------\n"
+    header = f"📢 <b>{today} 매매 결과 리포트</b>\n------------------------\n"
 
     report_body = ""
     success_count = 0
 
     for trade in trades:
 
-        name = trade['name']
-        symbol = trade['symbol']
-        buy_p = trade['buy_price']
-        tp = trade['tp']
-        sl = trade['sl']
+        name = trade.get("name")
+        symbol = trade.get("symbol")
+
+        buy_p = trade.get("buy_price") or trade.get("buy")
+        tp = trade.get("tp")
+        sl = trade.get("sl")
+
+        if not all([name, symbol, buy_p, tp, sl]):
+            continue
 
         try:
 
             df = fdr.DataReader(symbol).tail(1)
 
-            high_p = df['High'].iloc[0]
-            low_p = df['Low'].iloc[0]
+            high_p = df["High"].iloc[0]
+            low_p = df["Low"].iloc[0]
 
+            # 익절 확인
             if high_p >= tp and low_p > sl:
 
                 expected_profit = ((tp - buy_p) / buy_p) * 100
@@ -132,7 +143,7 @@ def run_performance_check():
 
     else:
 
-        print("⏳ 오늘은 확실하게 목표가에 도달한 수익 종목이 없어 메시지를 보내지 않습니다.")
+        print("⏳ 오늘은 확실하게 목표가에 도달한 수익 종목이 없습니다.")
 
 
 if __name__ == "__main__":

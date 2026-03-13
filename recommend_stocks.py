@@ -16,6 +16,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TRADES_FILE = "trades.json"
 
 def get_accurate_stocks():
+    """코스닥 종목 중 필터링을 통해 추천주 10개를 정확히 뽑아냅니다."""
     print("🔍 [단계 1] 종목 스캐닝 엔진 가동...")
     df_listing = fdr.StockListing('KOSDAQ')
     marcap_col = next((c for c in df_listing.columns if c.lower() == 'marcap'), 'Marcap')
@@ -34,6 +35,7 @@ def get_accurate_stocks():
         try:
             price_history = fdr.DataReader(symbol).tail(1)
             if price_history.empty: continue
+            # [수정] JSON 저장을 위해 반드시 일반 정수(int)로 변환
             actual_close = int(price_history['Close'].iloc[0])
             stock_data.append({'name': name, 'symbol': symbol, 'price': actual_close})
             print(f"✅ 선정: {name}({actual_close:,.0f}원)")
@@ -47,12 +49,11 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
     prompt = f"""
     너는 주식전문가 밸류레이더 소속의 노부장이야. 
     종목명: {name}, 전일종가: {price:,.0f}원. 
-    1~3일 보유 단타 관점에서 매수의견, 권장비중, 매수타점을 간단하게 2~3줄로 전문가처럼 작성해줘.
+    1~3일 보유 단타 관점에서 종목에대한 이슈와 차트분석을 간단하게 2~3줄로 전문가처럼 작성해줘.
     - 마크다운 특수문자(*, #)는 절대 사용하지 마세요.
     - 정중한 존댓말로 핵심만 짚어주세요.
     """
     
-    # 모든 안전 필터 해제 (최대한 대답을 끌어냄)
     safety_settings = [
         types.SafetySetting(category="HATE_SPEECH", threshold="BLOCK_NONE"),
         types.SafetySetting(category="HARASSMENT", threshold="BLOCK_NONE"),
@@ -71,7 +72,6 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
             ai_content = response.text.strip().replace('*', '').replace('#', '')
             print(f"🎯 {name} AI 정밀 분석 성공!")
         else:
-            # [수정] Fallback 제거: 실패 시 실패했다고 명시
             ai_content = "⚠️ 현재 해당 종목에 대한 AI 정밀 분석 데이터를 불러올 수 없습니다."
             print(f"🚨 {name} AI 분석 거절됨 (Safety Filter)")
 
@@ -107,7 +107,7 @@ def send_telegram(text):
 if __name__ == "__main__":
     try:
         client = genai.Client(api_key=GEMINI_API_KEY, http_options={'api_version': 'v1'})
-        target_model = "gemini-1.5-flash" # 가장 대답을 잘하는 모델로 고정
+        target_model = "gemini-1.5-flash" 
         
         stocks = get_accurate_stocks()
         today_trades = []
@@ -124,13 +124,26 @@ if __name__ == "__main__":
             try:
                 report = generate_buy_report(client, target_model, name, price, tp, sl, profit_expect)
                 res = send_telegram(report)
+                
+                # [중요] 텔레그램 전송이 성공했을 때만 장부에 기록합니다.
                 if res.status_code == 200:
-                    today_trades.append({'date': today_str, 'name': name, 'symbol': symbol, 'buy_price': price, 'tp': tp, 'sl': sl})
+                    today_trades.append({
+                        'date': today_str, 
+                        'name': name, 
+                        'symbol': symbol, 
+                        'buy_price': price, 
+                        'tp': tp, 
+                        'sl': sl
+                    })
+                    
+                    # [백업 보장] 루프 안에서 매번 파일을 저장하여 데이터 유실을 방지합니다.
                     with open(TRADES_FILE, 'w', encoding='utf-8') as f:
                         json.dump(today_trades, f, ensure_ascii=False, indent=4)
-                    print(f"✅ {name} 발송 완료")
+                    print(f"✅ {name} 발송 및 장부 기록 완료")
+                    
             except Exception as e:
                 print(f"⚠️ {name} 처리 중 오류: {e}")
                 continue
+                
     except Exception as e:
         print(f"🚨 치명적 오류: {e}")

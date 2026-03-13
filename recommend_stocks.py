@@ -76,8 +76,6 @@ def load_prices(symbols):
 
 def analyze_all(client, model, stocks, prices):
 
-    today = datetime.now().strftime("%m월 %d일")
-
     stock_list = ""
 
     for s in stocks:
@@ -92,7 +90,7 @@ def analyze_all(client, model, stocks, prices):
 
 아래 종목들을 단기 스윙(1~3일) 관점에서 분석하라.
 
-반드시 아래 규칙을 지켜라.
+규칙
 
 목표가
 현재가 기준 +6~8%
@@ -100,7 +98,7 @@ def analyze_all(client, model, stocks, prices):
 손절가
 현재가 기준 -3%
 
-출력 형식 (반드시 동일)
+출력 형식
 
 종목명
 목표가: 숫자
@@ -178,11 +176,9 @@ def send_telegram(text):
     try:
 
         r=requests.post(url,json=payload,timeout=10)
-
         return r.status_code==200
 
     except:
-
         return False
 
 
@@ -212,6 +208,24 @@ def make_message(name,price,tp,sl,analysis):
 """
 
 
+def load_trades():
+
+    if not os.path.exists(TRADES_FILE):
+        return []
+
+    try:
+        with open(TRADES_FILE,"r",encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return []
+
+
+def save_trades(trades):
+
+    with open(TRADES_FILE,"w",encoding="utf-8") as f:
+        json.dump(trades,f,ensure_ascii=False,indent=4)
+
+
 if __name__=="__main__":
 
     client=genai.Client(
@@ -231,9 +245,11 @@ if __name__=="__main__":
 
     analysis=analyze_all(client,model,stocks,prices)
 
-    trades=[]
+    existing_trades = load_trades()
 
     today=datetime.now().strftime("%m월 %d일")
+
+    new_trades=[]
 
     for s in stocks:
 
@@ -257,17 +273,22 @@ if __name__=="__main__":
 
             print("✅ 전송:",name)
 
-            trades.append({
+            profit=((tp-price)/price)*100
+
+            new_trades.append({
                 "date":today,
                 "name":name,
                 "symbol":symbol,
-                "buy":price,
+                "buy_price":price,
                 "tp":tp,
-                "sl":sl
+                "sl":sl,
+                "expected_profit":round(profit,2)
             })
 
         time.sleep(8)
 
-    with open(TRADES_FILE,"w",encoding="utf-8") as f:
+    all_trades = existing_trades + new_trades
 
-        json.dump(trades,f,ensure_ascii=False,indent=4)
+    save_trades(all_trades)
+
+    print(f"📒 거래 기록 저장 완료 (누적 {len(all_trades)}건)")

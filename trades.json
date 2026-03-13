@@ -78,5 +78,86 @@
         "buy_price": 1406,
         "tp": 1460,
         "sl": 1370
+    },
+    {
+        "date": "03월 13일",
+        "name": "한선엔지니어링",
+        "symbol": "452280",
+        "buy_price": 16370,
+        "tp": 17350,
+        "sl": 15880,
+        "expected_profit": 5.99
+    },
+    {
+        "date": "03월 13일",
+        "name": "테라뷰",
+        "symbol": "950250",
+        "buy_price": 8670,
+        "tp": 9190,
+        "sl": 8410,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "03월 13일",
+        "name": "폴라리스AI",
+        "symbol": "039980",
+        "buy_price": 2010,
+        "tp": 2150,
+        "sl": 1949,
+        "expected_profit": 6.97
+    },
+    {
+        "date": "03월 13일",
+        "name": "아크릴",
+        "symbol": "0007C0",
+        "buy_price": 45150,
+        "tp": 47860,
+        "sl": 43795,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "03월 13일",
+        "name": "한일사료",
+        "symbol": "005860",
+        "buy_price": 4385,
+        "tp": 4650,
+        "sl": 4250,
+        "expected_profit": 6.04
+    },
+    {
+        "date": "03월 13일",
+        "name": "SKAI",
+        "symbol": "357880",
+        "buy_price": 4350,
+        "tp": 4610,
+        "sl": 4220,
+        "expected_profit": 5.98
+    },
+    {
+        "date": "03월 13일",
+        "name": "폴라리스AI파마",
+        "symbol": "041910",
+        "buy_price": 7510,
+        "tp": 8035,
+        "sl": 7284,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "03월 13일",
+        "name": "국전약품",
+        "symbol": "307750",
+        "buy_price": 4875,
+        "tp": 5170,
+        "sl": 4730,
+        "expected_profit": 6.05
+    },
+    {
+        "date": "03월 13일",
+        "name": "지투파워",
+        "symbol": "388050",
+        "buy_price": 12260,
+        "tp": 13000,
+        "sl": 11890,
+        "expected_profit": 6.04
     }
 ]

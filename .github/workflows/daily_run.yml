@@ -2,17 +2,18 @@ name: Value Radar Bot
 
 on:
   schedule:
-    - cron: '15 23 * * *'
+    # [수정] 한국시간 오전 8:00(UTC 23:00)로 설정. 
+    # 깃허브 지연(10~15분)을 고려하면 8시 10분~15분 사이에 도착하게 됩니다.
+    - cron: '00 23 * * *'
   workflow_dispatch:
 
-# [핵심] 로봇에게 모든 권한을 강제로 부여합니다.
+# 로봇에게 장부를 쓸 권한(write)을 부여합니다.
 permissions: write-all
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      # [수정] 신분증을 확실히 들고 들어가게 세팅했습니다.
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -34,3 +35,13 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
+
+      # [추가] 중요: 오늘 추천한 종목(trades.json)을 깃허브에 저장합니다.
+      # 그래야 내일 아침에 로봇이 어제 뭐 샀는지 기억하고 수익 인증을 합니다.
+      - name: Commit and Push Trades Record
+        run: |
+          git config --global user.name "ValueRadarBot"
+          git config --global user.email "bot@valueradar.com"
+          git add trades.json
+          git commit -m "Update trades record [skip ci]" || echo "No changes to commit"
+          git push

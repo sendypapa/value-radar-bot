@@ -4,6 +4,7 @@ import requests
 import os
 import time
 import json
+import re
 from datetime import datetime
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
@@ -74,6 +75,13 @@ def load_prices(symbols):
     return prices
 
 
+def extract_number(text):
+    nums = re.findall(r'\d+', text.replace(",", ""))
+    if nums:
+        return int(nums[0])
+    return None
+
+
 def analyze_all(client, model, stocks, prices):
 
     stock_list = ""
@@ -81,7 +89,7 @@ def analyze_all(client, model, stocks, prices):
     for s in stocks:
 
         name = s["name"]
-        price = prices.get(s["symbol"],0)
+        price = prices.get(s["symbol"], 0)
 
         stock_list += f"{name} 현재가:{price}\n"
 
@@ -91,12 +99,8 @@ def analyze_all(client, model, stocks, prices):
 아래 종목들을 단기 스윙(1~3일) 관점에서 분석하라.
 
 규칙
-
-목표가
-현재가 기준 +6~8%
-
-손절가
-현재가 기준 -3%
+목표가 현재가 기준 +6~8%
+손절가 현재가 기준 -3%
 
 출력 형식
 
@@ -104,8 +108,6 @@ def analyze_all(client, model, stocks, prices):
 목표가: 숫자
 손절가: 숫자
 분석: 2~3줄 설명
-
-특수문자 * # 사용 금지
 
 종목 목록
 {stock_list}
@@ -116,75 +118,87 @@ def analyze_all(client, model, stocks, prices):
         contents=prompt
     )
 
-    text = res.text.replace("*","").replace("#","")
+    text = res.text.replace("*", "").replace("#", "")
+
+    print("===== AI RESPONSE =====")
+    print(text)
+    print("=======================")
 
     result = {}
 
     lines = text.split("\n")
 
-    current=None
-    data={}
+    current = None
+    data = {}
+
+    stock_names = [s["name"] for s in stocks]
 
     for line in lines:
 
-        line=line.strip()
+        line = line.strip()
 
         if not line:
             continue
 
-        if line in [s["name"] for s in stocks]:
+        # 종목명 인식
+        for name in stock_names:
+            if name in line:
+                if current:
+                    result[current] = data
+                current = name
+                data = {}
+                break
 
-            if current:
-                result[current]=data
+        if "목표가" in line:
 
-            current=line
-            data={}
-
-        elif "목표가" in line:
-
-            data["tp"]=int(line.split(":")[1].replace(",",""))
+            num = extract_number(line)
+            if num:
+                data["tp"] = num
 
         elif "손절가" in line:
 
-            data["sl"]=int(line.split(":")[1].replace(",",""))
+            num = extract_number(line)
+            if num:
+                data["sl"] = num
 
         elif "분석" in line:
 
-            data["analysis"]=line.split(":",1)[1]
+            if ":" in line:
+                data["analysis"] = line.split(":",1)[1].strip()
+            else:
+                data["analysis"] = ""
 
         else:
 
             if "analysis" in data:
-                data["analysis"]+=" "+line
+                data["analysis"] += " " + line
 
     if current:
-        result[current]=data
+        result[current] = data
 
     return result
 
 
 def send_telegram(text):
 
-    url=f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
-    payload={
-        "chat_id":CHAT_ID,
-        "text":text,
-        "parse_mode":"HTML"
+    payload = {
+        "chat_id": CHAT_ID,
+        "text": text,
+        "parse_mode": "HTML"
     }
 
     try:
-
-        r=requests.post(url,json=payload,timeout=10)
-        return r.status_code==200
-
+        r = requests.post(url, json=payload, timeout=10)
+        return r.status_code == 200
     except:
         return False
 
 
-def make_message(name,price,tp,sl,analysis):
+def make_message(name, price, tp, sl, analysis):
 
-    today=datetime.now().strftime("%m월 %d일")
+    today = datetime.now().strftime("%m월 %d일")
 
     return f"""
 📢 <b>[밸류레이더] 오늘의 단기 공략주</b>
@@ -214,7 +228,7 @@ def load_trades():
         return []
 
     try:
-        with open(TRADES_FILE,"r",encoding="utf-8") as f:
+        with open(TRADES_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except:
         return []
@@ -222,67 +236,67 @@ def load_trades():
 
 def save_trades(trades):
 
-    with open(TRADES_FILE,"w",encoding="utf-8") as f:
-        json.dump(trades,f,ensure_ascii=False,indent=4)
+    with open(TRADES_FILE, "w", encoding="utf-8") as f:
+        json.dump(trades, f, ensure_ascii=False, indent=4)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
 
-    client=genai.Client(
+    client = genai.Client(
         api_key=GEMINI_API_KEY,
-        http_options={"api_version":"v1beta"}
+        http_options={"api_version": "v1beta"}
     )
 
-    model=find_best_model(client)
+    model = find_best_model(client)
 
-    stocks=get_stocks()
+    stocks = get_stocks()
 
-    symbols=[s["symbol"] for s in stocks]
+    symbols = [s["symbol"] for s in stocks]
 
-    prices=load_prices(symbols)
+    prices = load_prices(symbols)
 
     print("📊 AI 전체 분석 시작")
 
-    analysis=analyze_all(client,model,stocks,prices)
+    analysis = analyze_all(client, model, stocks, prices)
 
     existing_trades = load_trades()
 
-    today=datetime.now().strftime("%m월 %d일")
+    today = datetime.now().strftime("%m월 %d일")
 
-    new_trades=[]
+    new_trades = []
 
     for s in stocks:
 
-        name=s["name"]
-        symbol=s["symbol"]
+        name = s["name"]
+        symbol = s["symbol"]
 
         if symbol not in prices:
             continue
 
-        price=prices[symbol]
+        price = prices[symbol]
 
-        data=analysis.get(name,{})
+        data = analysis.get(name, {})
 
-        tp=data.get("tp",int(price*1.07))
-        sl=data.get("sl",int(price*0.97))
-        text=data.get("analysis","분석 데이터 없음")
+        tp = data.get("tp", int(price * 1.07))
+        sl = data.get("sl", int(price * 0.97))
+        text = data.get("analysis", "AI 분석 데이터 없음")
 
-        msg=make_message(name,price,tp,sl,text)
+        msg = make_message(name, price, tp, sl, text)
 
         if send_telegram(msg):
 
-            print("✅ 전송:",name)
+            print("✅ 전송:", name)
 
-            profit=((tp-price)/price)*100
+            profit = ((tp - price) / price) * 100
 
             new_trades.append({
-                "date":today,
-                "name":name,
-                "symbol":symbol,
-                "buy_price":price,
-                "tp":tp,
-                "sl":sl,
-                "expected_profit":round(profit,2)
+                "date": today,
+                "name": name,
+                "symbol": symbol,
+                "buy_price": price,
+                "tp": tp,
+                "sl": sl,
+                "expected_profit": round(profit, 2)
             })
 
         time.sleep(8)

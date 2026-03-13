@@ -15,6 +15,24 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 TRADES_FILE = "trades.json"
 
+def find_best_model(client):
+    """사용 가능한 모델 중 우선순위(한도 높은 순)에 따라 최적의 모델을 반환합니다."""
+    try:
+        available = [m.name for m in client.models.list() if 'generateContent' in m.supported_actions]
+        # 한도(RPD)가 넉넉한 최신 모델 우선순위
+        priorities = ['gemini-3.1-flash-lite', 'gemini-3-flash-lite', 'gemini-2.5-flash-lite']
+        
+        for priority in priorities:
+            target = [name for name in available if priority in name]
+            if target: 
+                print(f"📡 최적 모델 포착: {target[0]}")
+                return target[0]
+        
+        return available[0] # 우선순위 모델이 없으면 목록의 첫 번째 사용
+    except Exception as e:
+        print(f"⚠️ 모델 탐색 중 오류 발생: {e}")
+        return "gemini-2.5-flash"
+
 def get_accurate_stocks():
     """코스닥 종목 중 필터링을 통해 추천주 10개를 정확히 뽑아냅니다."""
     print("🔍 [단계 1] 종목 스캐닝 엔진 가동...")
@@ -35,7 +53,6 @@ def get_accurate_stocks():
         try:
             price_history = fdr.DataReader(symbol).tail(1)
             if price_history.empty: continue
-            # [수정] JSON 저장을 위해 반드시 일반 정수(int)로 변환
             actual_close = int(price_history['Close'].iloc[0])
             stock_data.append({'name': name, 'symbol': symbol, 'price': actual_close})
             print(f"✅ 선정: {name}({actual_close:,.0f}원)")
@@ -46,10 +63,8 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
     """400 에러를 방지하기 위해 매개변수 형식을 표준화한 버전입니다."""
     today_date = datetime.now().strftime('%m월 %d일')
     
-    # [수정] 모델 이름에 models/ 가 없다면 붙여주는 안전장치
     full_model_name = model_name if model_name.startswith("models/") else f"models/{model_name}"
     
-    # 노부장님의 필터 우회형 프롬프트 (이슈 + 차트분석 요청)
     prompt = f"""
     너는 주식전문가 밸류레이더 소속의 노부장이야. 
     종목명: {name}, 전일종가: {price:,.0f}원. 
@@ -58,7 +73,6 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
     - 정중한 존댓말로 핵심만 짚어주세요.
     """
     
-    # [수정] 400 에러를 방지하기 위해 카테고리 명칭을 최신 표준으로 정리
     safety_settings = [
         types.SafetySetting(category="HATE_SPEECH", threshold="OFF"),
         types.SafetySetting(category="HARASSMENT", threshold="OFF"),
@@ -67,7 +81,6 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
     ]
 
     try:
-        # [수정] config 구조를 명확히 전달
         response = client.models.generate_content(
             model=full_model_name, 
             contents=prompt,
@@ -82,7 +95,6 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
             print(f"🚨 {name} AI 분석 거절됨 (Safety Filter)")
 
     except Exception as e:
-        # [디버깅] 에러 원인을 더 정확히 파악하기 위해 로그 출력 강화
         print(f"⚠️ {name} AI 분석 에러 발생: {e}")
         ai_content = "분석포인트 별도 전달드리겠습니다."
 
@@ -114,7 +126,9 @@ def send_telegram(text):
 if __name__ == "__main__":
     try:
         client = genai.Client(api_key=GEMINI_API_KEY, http_options={'api_version': 'v1'})
-        target_model = "gemini-1.5-flash" 
+        
+        # [수정] 사용 가능한 최적의 모델(한도 여유 순)을 자동으로 선택합니다.
+        target_model = find_best_model(client)
         
         stocks = get_accurate_stocks()
         today_trades = []
@@ -132,7 +146,6 @@ if __name__ == "__main__":
                 report = generate_buy_report(client, target_model, name, price, tp, sl, profit_expect)
                 res = send_telegram(report)
                 
-                # [중요] 텔레그램 전송이 성공했을 때만 장부에 기록합니다.
                 if res.status_code == 200:
                     today_trades.append({
                         'date': today_str, 
@@ -143,7 +156,6 @@ if __name__ == "__main__":
                         'sl': sl
                     })
                     
-                    # [백업 보장] 루프 안에서 매번 파일을 저장하여 데이터 유실을 방지합니다.
                     with open(TRADES_FILE, 'w', encoding='utf-8') as f:
                         json.dump(today_trades, f, ensure_ascii=False, indent=4)
                     print(f"✅ {name} 발송 및 장부 기록 완료")

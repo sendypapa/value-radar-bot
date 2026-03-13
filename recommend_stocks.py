@@ -5,7 +5,7 @@ import os
 import time
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
@@ -14,6 +14,9 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TRADES_FILE = "trades.json"
 
 
+# =============================
+# 모델 선택
+# =============================
 def find_best_model(client):
 
     models = [m.name for m in client.models.list()]
@@ -33,7 +36,58 @@ def find_best_model(client):
     return models[0]
 
 
-def get_stocks():
+# =============================
+# 최근 추천 종목 불러오기
+# =============================
+def load_trades():
+
+    if not os.path.exists(TRADES_FILE):
+        return []
+
+    try:
+        with open(TRADES_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except:
+        return []
+
+
+# =============================
+# 거래 기록 저장
+# =============================
+def save_trades(trades):
+
+    with open(TRADES_FILE, "w", encoding="utf-8") as f:
+        json.dump(trades, f, ensure_ascii=False, indent=4)
+
+
+# =============================
+# 최근 3일 추천 종목 필터
+# =============================
+def get_recent_symbols(trades):
+
+    recent = set()
+
+    today = datetime.now()
+
+    for t in trades:
+
+        try:
+            d = datetime.strptime(t["date"], "%m월 %d일")
+            d = d.replace(year=today.year)
+
+            if (today - d).days <= 3:
+                recent.add(t["symbol"])
+
+        except:
+            pass
+
+    return recent
+
+
+# =============================
+# 종목 리스트 가져오기
+# =============================
+def get_stocks(trades):
 
     df = fdr.StockListing("KOSDAQ")
 
@@ -42,20 +96,51 @@ def get_stocks():
 
     filtered = df[(df[marcap] >= 100000000000) & (df[marcap] <= 800000000000)]
 
-    top = filtered.sort_values(by=amount, ascending=False).head(10)
+    top = filtered.sort_values(by=amount, ascending=False).head(30)
+
+    recent_symbols = get_recent_symbols(trades)
 
     stocks = []
 
     for _, r in top.iterrows():
 
+        symbol = r["Code"]
+
+        if symbol in recent_symbols:
+            continue
+
         stocks.append({
-            "symbol": r["Code"],
+            "symbol": symbol,
             "name": r["Name"]
         })
 
-    return stocks
+    return stocks[:10]
 
 
+# =============================
+# 거래대금 급증 필터
+# =============================
+def volume_filter(symbol):
+
+    try:
+
+        df = fdr.DataReader(symbol).tail(6)
+
+        if len(df) < 6:
+            return False
+
+        today = df["Volume"].iloc[-1]
+        avg = df["Volume"].iloc[:-1].mean()
+
+        return today > avg
+
+    except:
+        return False
+
+
+# =============================
+# 가격 로드
+# =============================
 def load_prices(symbols):
 
     prices = {}
@@ -63,6 +148,9 @@ def load_prices(symbols):
     for s in symbols:
 
         try:
+
+            if not volume_filter(s):
+                continue
 
             df = fdr.DataReader(s).tail(1)
 
@@ -75,13 +163,22 @@ def load_prices(symbols):
     return prices
 
 
+# =============================
+# 숫자 추출
+# =============================
 def extract_number(text):
+
     nums = re.findall(r'\d+', text.replace(",", ""))
+
     if nums:
         return int(nums[0])
+
     return None
 
 
+# =============================
+# AI 분석
+# =============================
 def analyze_all(client, model, stocks, prices):
 
     stock_list = ""
@@ -96,7 +193,7 @@ def analyze_all(client, model, stocks, prices):
     prompt = f"""
 너는 밸류레이더의 주식 전문가 노부장이다.
 
-아래 종목들을 단기 스윙(1~3일) 관점에서 분석하라.
+단기 스윙(1~3일) 관점에서 분석하라.
 
 규칙
 목표가 현재가 기준 +6~8%
@@ -120,9 +217,7 @@ def analyze_all(client, model, stocks, prices):
 
     text = res.text.replace("*", "").replace("#", "")
 
-    print("===== AI RESPONSE =====")
     print(text)
-    print("=======================")
 
     result = {}
 
@@ -140,11 +235,13 @@ def analyze_all(client, model, stocks, prices):
         if not line:
             continue
 
-        # 종목명 인식
         for name in stock_names:
+
             if name in line:
+
                 if current:
                     result[current] = data
+
                 current = name
                 data = {}
                 break
@@ -152,26 +249,23 @@ def analyze_all(client, model, stocks, prices):
         if "목표가" in line:
 
             num = extract_number(line)
+
             if num:
                 data["tp"] = num
 
         elif "손절가" in line:
 
             num = extract_number(line)
-            if num:
+
+            if "%" in line or (num and num < 1000):
+                data["sl"] = None
+            else:
                 data["sl"] = num
 
         elif "분석" in line:
 
             if ":" in line:
                 data["analysis"] = line.split(":",1)[1].strip()
-            else:
-                data["analysis"] = ""
-
-        else:
-
-            if "analysis" in data:
-                data["analysis"] += " " + line
 
     if current:
         result[current] = data
@@ -179,6 +273,9 @@ def analyze_all(client, model, stocks, prices):
     return result
 
 
+# =============================
+# 텔레그램 전송
+# =============================
 def send_telegram(text):
 
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -196,6 +293,9 @@ def send_telegram(text):
         return False
 
 
+# =============================
+# 메시지 생성
+# =============================
 def make_message(name, price, tp, sl, analysis):
 
     today = datetime.now().strftime("%m월 %d일")
@@ -222,24 +322,9 @@ def make_message(name, price, tp, sl, analysis):
 """
 
 
-def load_trades():
-
-    if not os.path.exists(TRADES_FILE):
-        return []
-
-    try:
-        with open(TRADES_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return []
-
-
-def save_trades(trades):
-
-    with open(TRADES_FILE, "w", encoding="utf-8") as f:
-        json.dump(trades, f, ensure_ascii=False, indent=4)
-
-
+# =============================
+# MAIN
+# =============================
 if __name__ == "__main__":
 
     client = genai.Client(
@@ -249,17 +334,15 @@ if __name__ == "__main__":
 
     model = find_best_model(client)
 
-    stocks = get_stocks()
+    existing_trades = load_trades()
+
+    stocks = get_stocks(existing_trades)
 
     symbols = [s["symbol"] for s in stocks]
 
     prices = load_prices(symbols)
 
-    print("📊 AI 전체 분석 시작")
-
     analysis = analyze_all(client, model, stocks, prices)
-
-    existing_trades = load_trades()
 
     today = datetime.now().strftime("%m월 %d일")
 
@@ -277,8 +360,15 @@ if __name__ == "__main__":
 
         data = analysis.get(name, {})
 
-        tp = data.get("tp", int(price * 1.07))
-        sl = data.get("sl", int(price * 0.97))
+        tp = data.get("tp")
+        sl = data.get("sl")
+
+        if not tp or tp < price:
+            tp = int(price * 1.07)
+
+        if not sl or sl > price or sl < price*0.8:
+            sl = int(price * 0.97)
+
         text = data.get("analysis", "AI 분석 데이터 없음")
 
         msg = make_message(name, price, tp, sl, text)

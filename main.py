@@ -46,8 +46,17 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
     
     prompt = f"""
     당신은 전문 주식 애널리스트입니다. 종목명: {name}, 추천가: {price:,.0f}원
-    이 종목의 단기 상승 모멘텀을 분석하여 3~4줄 내외로 정중하게 설명하세요.
-    마크다운 기호 금지, 순수 텍스트로만 작성.
+    이 종목의 단기 상승 모멘텀을 분석하여 정중하게 설명하세요.
+    
+    [작성 지침]
+
+    - 반드시 정중하고 따뜻한 존댓말로 작성할 것.
+
+    - 1~3일 단기 매매 관점에서 '매수의견, 투자비중, 매수타점, 익절가, 손절가'를 핵심만 작성할 것.
+
+    - 마크다운 기호(예: **, _, #)를 절대 사용하지 말고 순수 텍스트와 줄바꿈으로만 구성할 것.
+
+    - 전체 분량은 6~7줄 이내로 아주 간결하게 작성할 것.
     """
     
     try:
@@ -58,16 +67,16 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
 
     report = (
         f"안녕하세요 밸류레이더 노부장입니다.\n"
-        f"<b>{today_date} 금일 단기 공략주 공유드립니다.</b>\n\n"
-        f"📌 <b>[{name} 분석 리포트]</b>\n"
+        f"{today_date} 금일 단기 공략주 공유드립니다.\n\n"
+        f"📌 [{name} 분석 리포트]\n"
         f"• 매수 타점: <b>{price:,.0f}원</b> (전일 종가 부근)\n"
         f"• 예상 수익률: <b>약 {profit_expect}%</b>\n"
         f"• 투자 비중: <b>10~15% 내외</b>\n\n"
-        f"✅ <b>조건부 매도 추천가</b>\n"
-        f"• 익절 목표가: <b>{tp:,.0f}원</b>\n"
-        f"• 손절 대응가: <b>{sl:,.0f}원</b>\n\n"
-        f"📖 <b>분석 포인트</b>\n{ai_content}\n\n"
-        f"⚠️ <b>노부장의 안내사항</b>\n"
+        f"✅ 조건부 매도 추천가\n"
+        f"• 익절 목표가: <b>{tp:,.0f}원\n"
+        f"• 손절 대응가: <b>{sl:,.0f}원\n\n"
+        f"📖 분석 포인트\n{ai_content}\n\n"
+        f"⚠️ 노부장의 안내사항\n"
         f"1분 1초마다 바뀌는 장 특성상 사인을 보고 매도를 하시면 늦습니다. "
         f"조건부 매도 세팅을 통해 안정적인 매매 세팅을 하시는 것을 권고드립니다.\n\n"
         f"반드시 1~5일 지켜봐주시기 바랍니다. 오늘도 성투를 빌겠습니다."
@@ -96,7 +105,7 @@ def check_performance():
             # 수익률 계산 (매수추천가 대비 익절가 도달 여부)
             if high_p >= tp:
                 actual_profit = ((tp - buy_p) / buy_p) * 100
-                status = f"✅ <b>익절 달성! (+{actual_profit:.1f}%)</b>"
+                status = f"✅ <b>축하드립니다! 수익 달성! (+{actual_profit:.1f}%)</b>"
             elif high_p <= sl:
                 status = "❌ <b>손절 처리</b>"
             else:

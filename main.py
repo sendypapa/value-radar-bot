@@ -15,20 +15,44 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TRADES_FILE = "trades.json"
 
 def get_accurate_stocks():
+    """코스닥 종목 중 필터링을 통해 추천주 10개를 정확히 뽑아냅니다."""
+    print("🔍 [단계 1] 코스닥 종목 리스트 불러오는 중...")
     df_listing = fdr.StockListing('KOSDAQ')
-    filtered = df_listing[(df_listing['Marcap'] >= 100000000000) & (df_listing['Marcap'] <= 600000000000)]
-    top_10 = filtered.sort_values(by='Amount', ascending=False).head(10)
+    
+    # [수정] 컬럼명 대소문자 문제 완벽 해결
+    # Marcap, MarCap, MARCAP 어떤 이름이든 찾아냅니다.
+    target_col = next((c for c in df_listing.columns if c.lower() == 'marcap'), None)
+    
+    if not target_col:
+        print("🚨 에러: 시가총액 컬럼을 찾을 수 없습니다!")
+        return []
+
+    # [수정] 필터링 조건 최적화 (시총 1,000억 ~ 8,000억으로 확대)
+    filtered = df_listing[(df_listing[target_col] >= 100000000000) & (df_listing[target_col] <= 800000000000)]
+    
+    # 거래대금(Amount) 순으로 정렬 (거래 활발한 종목 우선)
+    amt_col = next((c for c in df_listing.columns if c.lower() == 'amount'), target_col)
+    top_candidates = filtered.sort_values(by=amt_col, ascending=False).head(20) # 20개 먼저 뽑음
+    
+    print(f"📊 후보 종목 {len(top_candidates)}개 발견! 정밀 분석 시작...")
     
     stock_data = []
-    for _, row in top_10.iterrows():
+    for _, row in top_candidates.iterrows():
+        if len(stock_data) >= 10: break # 딱 10개만 채우면 종료
+        
         symbol = row['Code']
         name = row['Name']
         try:
+            # 실시간 가격(또는 전일 종가) 수집
             price_history = fdr.DataReader(symbol).tail(1)
+            if price_history.empty: continue
+            
             actual_close = price_history['Close'].iloc[0]
             stock_data.append({'name': name, 'symbol': symbol, 'price': actual_close})
+            print(f"✅ 선정 완료: {name}({actual_close:,.0f}원)")
         except:
             continue
+            
     return stock_data
 
 def find_best_model(client):

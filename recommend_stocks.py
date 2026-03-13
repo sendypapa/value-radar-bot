@@ -59,7 +59,6 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
     """AI를 통해 종목별로 '살아있는' 2줄 분석 리포트를 생성합니다."""
     today_date = datetime.now().strftime('%m월 %d일')
     
-    # [수정] AI에게 더 구체적이고 전문적인 분석을 요구하는 프롬프트
     prompt = f"""
     당신은 밸류레이더 소속의 베테랑 주식 애널리스트입니다. 
     대상 종목: {name}, 현재가: {price:,.0f}원
@@ -74,10 +73,8 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
     try:
         response = client.models.generate_content(model=model_name, contents=prompt)
         ai_content = response.text.strip()
-        # AI 응답이 너무 짧거나 문제가 있을 경우 에러 발생시켜 fallback 작동
         if len(ai_content) < 10: raise ValueError
     except:
-        # AI 실패 시에도 고정되지 않게 5가지 백업 문구 중 랜덤 선택
         fallbacks = [
             f"주요 이평선 부근에서 강력한 지지세가 확인되며, 바닥권 거래량이 실리는 추세 전환 국면입니다.",
             f"최근 기관의 연속적인 수급 유입이 포착되었으며, 전고점 매물 소화 후 슈팅이 기대되는 자리입니다.",
@@ -136,18 +133,23 @@ if __name__ == "__main__":
                     print(f"⏳ RPM 보호를 위해 15초 대기 중... ({i+1}/10)")
                     time.sleep(15)
                 
+                # 텔레그램 발송 및 리포트 생성
                 report = generate_buy_report(client, target_model, name, price, tp, sl, profit_expect)
                 send_telegram(report)
                 print(f"✅ {name} 추천 완료")
                 
+                # 리스트에 추가
                 today_trades.append({
                     'date': today_str, 'name': name, 'symbol': symbol, 
                     'buy_price': price, 'tp': tp, 'sl': sl
                 })
 
-            with open(TRADES_FILE, 'w', encoding='utf-8') as f:
-                json.dump(today_trades, f, ensure_ascii=False, indent=4)
-            print(f"💾 {len(today_trades)}개 종목 장부 기록 완료")
+                # [중요] 한 종목 보낼 때마다 즉시 장부 파일 업데이트 (실시간 백업)
+                with open(TRADES_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(today_trades, f, ensure_ascii=False, indent=4)
+                print(f"💾 {name} 장부 실시간 기록 완료")
+                
+            print(f"🎯 총 {len(today_trades)}개 종목 최종 기록 완료")
                 
     except Exception as e:
         print(f"🚨 추천 시스템 치명적 오류: {e}")

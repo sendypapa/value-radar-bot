@@ -57,16 +57,27 @@ def run_recommendation():
                 f"오늘도 성투를 빌겠습니다."
             )
             
+            # 텔레그램 전송
             url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
             requests.post(url, json={"chat_id": CHAT_ID, "text": report, "parse_mode": "HTML"})
             
+            # [핵심] 리스트에 추가 (에러 없이 여기까지 와야 리스트에 담깁니다)
             today_trades.append({'date': today_str, 'name': name, 'symbol': symbol, 'buy_price': price, 'tp': tp, 'sl': sl})
+            print(f"✅ {name} 완료 ({count+1}/10)")
+            
             count += 1
-            time.sleep(12)
-        except: continue
+            time.sleep(12) # RPM 보호
+        except Exception as e:
+            print(f"❌ {name} 처리 중 에러: {e}")
+            continue
 
-    with open(TRADES_FILE, 'w') as f:
-        json.dump(today_trades, f)
+    # [중요] 모든 종목 처리가 끝난 후 파일에 한 번에 저장합니다.
+    if today_trades:
+        with open(TRADES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(today_trades, f, ensure_ascii=False, indent=4)
+        print(f"💾 총 {len(today_trades)}개 종목 장부 저장 완료!")
+    else:
+        print("🚨 저장할 종목 데이터가 없습니다.")
 
 if __name__ == "__main__":
     run_recommendation()

@@ -2,12 +2,10 @@ name: Value Radar Bot
 
 on:
   schedule:
-    # [수정] 한국시간 오전 8:00(UTC 23:00)로 설정. 
-    # 깃허브 지연(10~15분)을 고려하면 8시 10분~15분 사이에 도착하게 됩니다.
+    # 한국 시간 오전 08:00 실행 (UTC 23:00)
     - cron: '00 23 * * *'
   workflow_dispatch:
 
-# 로봇에게 장부를 쓸 권한(write)을 부여합니다.
 permissions: write-all
 
 jobs:
@@ -29,16 +27,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -U google-genai finance-datareader requests pandas
 
-      - name: Run Stock Bot
+      - name: 1. 수익 인증 리포트 실행 (어제 결과 복기)
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python report_performance.py
+
+      - name: 2. 신규 종목 추천 실행 (오늘 분석 및 장부 기록)
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python main.py
+        run: python recommend_stocks.py
 
-      # [추가] 중요: 오늘 추천한 종목(trades.json)을 깃허브에 저장합니다.
-      # 그래야 내일 아침에 로봇이 어제 뭐 샀는지 기억하고 수익 인증을 합니다.
-      - name: Commit and Push Trades Record
+      - name: 3. 장부 파일 깃허브에 저장 (Commit & Push)
         run: |
           git config --global user.name "ValueRadarBot"
           git config --global user.email "bot@valueradar.com"

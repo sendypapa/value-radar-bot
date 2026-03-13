@@ -19,6 +19,7 @@ def run_performance_check():
         return
 
     try:
+        # [수정] encoding 설정 추가로 한글 깨짐 방지
         with open(TRADES_FILE, 'r', encoding='utf-8') as f:
             trades = json.load(f)
     except:
@@ -37,12 +38,15 @@ def run_performance_check():
     for trade in trades:
         name, symbol, buy_p, tp, sl = trade['name'], trade['symbol'], trade['buy_price'], trade['tp'], trade['sl']
         try:
-            # 당일 고가 확인
+            # 당일 고가와 저가 확인
             df = fdr.DataReader(symbol).tail(1)
             high_p = df['High'].iloc[0]
+            low_p = df['Low'].iloc[0] # [추가] 저가 데이터 확인
             
-            # [핵심] 익절가(tp)에 도달한 경우만 기존 폼 그대로 리포트에 추가
-            if high_p >= tp:
+            # [핵심 로직 변경] 
+            # 확실한 수익: 고가가 익절가 도달(>=tp) AND 저가가 손절가를 건드리지 않음(>sl)
+            # 만약 저가가 손절가 이하(<=sl)로 내려갔다면, 선후관계가 불분명하므로 수익 리포트에서 제외합니다.
+            if high_p >= tp and low_p > sl:
                 expected_profit = ((tp - buy_p) / buy_p) * 100
                 success_count += 1
                 
@@ -55,7 +59,7 @@ def run_performance_check():
                     f"결과 : ✅ <b>축하합니다 수익 달성! (+{expected_profit:.1f}%)</b>\n\n"
                 )
             else:
-                # 손절이나 관망은 리포트에 넣지 않고 패스합니다.
+                # 손절가를 건드렸거나 익절가에 미도달한 경우는 리포트에 넣지 않고 패스합니다.
                 continue
         except: continue
 
@@ -66,7 +70,7 @@ def run_performance_check():
         send_telegram(final_report)
         print(f"✅ 수익 인증 리포트 전송 완료 ({success_count}건)")
     else:
-        print("⏳ 오늘은 목표가에 도달한 수익 종목이 없어 메시지를 보내지 않습니다.")
+        print("⏳ 오늘은 확실하게 목표가에 도달한 수익 종목이 없어 메시지를 보내지 않습니다.")
 
 if __name__ == "__main__":
     run_performance_check()

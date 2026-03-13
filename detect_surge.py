@@ -97,7 +97,7 @@ def detect():
             continue
 
         # 테스트용 임계값
-        if change_val < 3:
+        if change_val < 10:
             continue
 
         if name in today_sent:

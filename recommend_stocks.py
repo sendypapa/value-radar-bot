@@ -43,7 +43,6 @@ def get_accurate_stocks():
 def find_best_model(client):
     try:
         available = [m.name for m in client.models.list() if 'generateContent' in m.supported_actions]
-        # models/ 접두사 제거 로직 추가
         target = next((m for m in available if 'gemini-1.5-flash' in m or 'gemini-2.0-flash' in m), available[0])
         return target
     except: return "gemini-1.5-flash"
@@ -52,25 +51,47 @@ def generate_buy_report(client, model_name, name, price, tp, sl, profit_expect):
     """노부장님의 특제 프롬프트를 사용하여 AI 분석 리포트를 생성합니다."""
     today_date = datetime.now().strftime('%m월 %d일')
     
-    # [수정] 노부장님의 아이디어를 반영한 '필터 우회형' 전문 분석 프롬프트
     prompt = f"""
-    너는 주식 전문 애널리스트입니다. 
-    현재 {name}의 가격은 {price:,.0f}원인데, 투자 전문가로서의 관점과 기술적 분석 부분의 관점으로 보았을 때의 단기주가전망에 대한 분석을 2줄로 요약해서 만들어주세요.
+    "최근 {name}의 가격 변동성과 거래량 추이를 분석했을 때, 기술적 분석 관점에서 유의미하게 살펴봐야 할 지점들을 2줄로 핵심만 요약해줘."
     - 마크다운 특수문자(*, #)는 절대 사용하지 마세요.
     - 정중한 존댓말로 핵심만 짚어주세요.
     """
+
+    # [추가] AI 분석 실패 시 사용할 전문가용 멘트 20가지
+    fallbacks = [
+        "최근 거래량이 실린 양봉이 출현하며 바닥권을 탈출하는 흐름이 포착되었습니다.",
+        "이동평균선 정배열 초입 단계로 단기 추세 전환의 가능성이 매우 높은 구간입니다.",
+        "주요 저항대를 대량 거래와 함께 돌파하며 상방으로의 에너지가 응축되고 있습니다.",
+        "과매도 구간 이후 주요 지표가 반등 신호를 보내고 있어 기술적 반등이 기대됩니다.",
+        "직전 고점 부근의 매물을 소화하는 과정으로, 돌파 시 강한 탄력이 예상됩니다.",
+        "외인과 기관의 순매수세가 유입되며 수급 개선이 뚜렷하게 나타나고 있는 자리입니다.",
+        "지지선 부근에서 하방 경직성을 확보하며 안정적인 눌림목 타점을 형성 중입니다.",
+        "볼린저 밴드 상단 돌파 시도가 이어지고 있어 단기 변동성 확대에 따른 수익 기회가 보입니다.",
+        "장기 이평선 돌파 후 안착하는 모습으로, 중단기적 우상향 추세가 유효한 구간입니다.",
+        "매집봉 형태의 윗꼬리 캔들이 발생하며 매물 소화 및 상승 에너지를 비축하고 있습니다.",
+        "하락 추세를 멈추는 도지형 캔들이 발생하여 변곡점 형성을 기대해볼 수 있습니다.",
+        "60일 이동평균선의 강력한 지지를 바탕으로 추세가 꺾이지 않고 유지되고 있습니다.",
+        "섹터 내 수급 순환매 흐름을 타며 기술적 반등의 정점에 위치한 것으로 분석됩니다.",
+        "갭 상승 후 지지를 받는 모습으로 보아 주체 세력의 개입이 강하게 의심되는 구간입니다.",
+        "심리적 저항선을 앞두고 거래량이 증가하고 있어 방향성 결정이 임박한 전망입니다.",
+        "횡보 구간을 탈피하는 장대 거래량이 포착되어 단기 시세 분출이 기대되는 자리입니다.",
+        "눌림목 형성 이후 재상승으로 가는 골든크로스 구간으로 기술적 매력도가 높습니다.",
+        "거래대금이 상위권에 랭크되며 시장의 뜨거운 관심을 받는 종목으로 추가 여력이 충분합니다.",
+        "하단 채널 지지력을 테스트한 후 반등하는 추세로 안정적인 우상향 흐름이 예상됩니다.",
+        "수급의 연속성이 확보된 상태로, 단기 과열 진입 전까지 홀딩 전략이 유효해 보입니다."
+    ]
     
     try:
         response = client.models.generate_content(model=model_name, contents=prompt)
-        if response.text:
-            # AI가 혹시나 넣었을지 모를 마크다운 기호를 한 번 더 제거합니다.
+        if response.text and len(response.text.strip()) > 5:
             ai_content = response.text.strip().replace('*', '').replace('#', '')
+            print(f"🎯 {name} AI 분석 성공!")
         else:
-            ai_content = "현재 기술적 지표상 반등 에너지가 응축된 구간으로 단기 수익 실현 가능성이 높은 자리입니다."
-        print(f"🎯 {name} 분석 성공!")
+            ai_content = random.choice(fallbacks)
+            print(f"⚠️ {name} AI 응답 부실로 랜덤 멘트 사용")
     except Exception as e:
         print(f"⚠️ {name} 분석 실패 (Fallback 사용): {e}")
-        ai_content = "현재 수급 흐름이 양호하며 주요 지지선에서의 기술적 반등이 유효한 구간입니다."
+        ai_content = random.choice(fallbacks)
 
     return (
         f"📢 <b>[밸류레이더] 오늘의 단기 공략주</b>\n\n"

@@ -240,5 +240,14 @@
         "tp": 26500,
         "sl": 23959,
         "expected_profit": 7.29
+    },
+    {
+        "date": "03월 15일",
+        "name": "한국피아이엠",
+        "symbol": "448900",
+        "buy_price": 120000,
+        "tp": 128400,
+        "sl": 116400,
+        "expected_profit": 7.0
     }
 ]

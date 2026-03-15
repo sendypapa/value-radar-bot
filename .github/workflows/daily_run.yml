@@ -2,7 +2,9 @@ name: Value Radar Bot
 
 on:
   schedule:
-    - cron: '0 23 * * *'
+    # 한국 시간 월~금 오전 07:20 실행
+    # UTC 기준 일~목 22:20
+    - cron: '20 22 * * 0-4'
   workflow_dispatch:
 
 permissions: write-all
@@ -44,7 +46,7 @@ jobs:
         run: |
           git config --global user.name "ValueRadarBot"
           git config --global user.email "bot@valueradar.com"
-          git add trades.json || true
-          git commit -m "Update trades record [skip ci]" || echo "No changes to commit"
+          git add trades.json performance_history.json || true
+          git commit -m "Update trades/performance record [skip ci]" || echo "No changes to commit"
           git pull --rebase
           git push

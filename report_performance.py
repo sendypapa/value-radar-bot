@@ -7,13 +7,13 @@ from datetime import datetime
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
 TRADES_FILE = "trades.json"
+PERFORMANCE_FILE = "performance_history.json"
 
 
 # ==========================
 # 텔레그램 전송
 # ==========================
 def send_telegram(text):
-
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
     payload = {
@@ -23,47 +23,62 @@ def send_telegram(text):
     }
 
     try:
-        requests.post(url, json=payload, timeout=10)
+        r = requests.post(url, json=payload, timeout=10)
+        if r.status_code != 200:
+            print("🚨 텔레그램 전송 실패:", r.text)
+    except Exception as e:
+        print("🚨 텔레그램 전송 실패:", e)
+
+
+# ==========================
+# JSON 로드 / 저장
+# ==========================
+def load_json_file(path, default):
+    if not os.path.exists(path):
+        return default
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
     except:
-        print("🚨 텔레그램 전송 실패")
+        return default
+
+
+def save_json_file(path, data):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 
 # ==========================
 # 장부 로드
 # ==========================
 def load_trades():
+    return load_json_file(TRADES_FILE, [])
 
-    if not os.path.exists(TRADES_FILE):
-        return []
 
-    try:
-        with open(TRADES_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        print("🚨 장부 파일 읽기 실패")
-        return []
+def load_performance_history():
+    return load_json_file(PERFORMANCE_FILE, [])
+
+
+def save_performance_history(data):
+    save_json_file(PERFORMANCE_FILE, data)
 
 
 # ==========================
 # 오늘 가격 데이터 조회
 # ==========================
 def load_market_data(symbols):
-
     market = {}
 
     for s in symbols:
-
         try:
-
             df = fdr.DataReader(s).tail(1)
 
             if not df.empty:
-
                 market[s] = {
-                    "high": df["High"].iloc[0],
-                    "low": df["Low"].iloc[0]
+                    "high": float(df["High"].iloc[0]),
+                    "low": float(df["Low"].iloc[0])
                 }
-
         except:
             continue
 
@@ -72,54 +87,47 @@ def load_market_data(symbols):
 
 # ==========================
 # 월간 성과 계산
+# performance_history 기준
 # ==========================
-def calculate_month_stats(trades, market):
-
+def calculate_month_stats(performance_history):
     current_month = datetime.now().strftime("%m")
 
-    profits = []
-    success_count = 0
+    monthly_records = [
+        x for x in performance_history
+        if x.get("date", "").startswith(current_month)
+    ]
 
-    for trade in trades:
-
-        date = trade.get("date", "")
-
-        if not date.startswith(current_month):
-            continue
-
-        symbol = trade.get("symbol")
-
-        if symbol not in market:
-            continue
-
-        buy = trade.get("buy_price")
-        tp = trade.get("tp")
-        sl = trade.get("sl")
-
-        if not all([buy, tp, sl]):
-            continue
-
-        high = market[symbol]["high"]
-        low = market[symbol]["low"]
-
-        if high >= tp and low > sl:
-
-            profit = ((tp - buy) / buy) * 100
-
-            profits.append(profit)
-            success_count += 1
+    profits = [x.get("profit", 0) for x in monthly_records]
 
     avg_profit = sum(profits) / len(profits) if profits else 0
     total_profit = sum(profits) if profits else 0
+    success_count = len(monthly_records)
 
     return avg_profit, total_profit, success_count
+
+
+# ==========================
+# 오늘 성공 종목을 성과 장부에 반영
+# 중복 저장 방지
+# ==========================
+def merge_today_results(history, today_results):
+    existing_keys = {
+        (x.get("date"), x.get("symbol"), round(float(x.get("profit", 0)), 1))
+        for x in history
+    }
+
+    for item in today_results:
+        key = (item.get("date"), item.get("symbol"), round(float(item.get("profit", 0)), 1))
+        if key not in existing_keys:
+            history.append(item)
+
+    return history
 
 
 # ==========================
 # 성과 리포트
 # ==========================
 def run_performance_check():
-
     trades = load_trades()
 
     if not trades:
@@ -127,38 +135,35 @@ def run_performance_check():
         return
 
     today = datetime.now().strftime("%m월 %d일")
-
     header = f"📢 <b>{today} 매매 결과 리포트</b>\n------------------------\n"
 
     symbols = list({t["symbol"] for t in trades if "symbol" in t})
-
     market = load_market_data(symbols)
 
     report_body = ""
     success_count = 0
+    today_results = []
 
     for trade in trades:
-
         name = trade.get("name")
         symbol = trade.get("symbol")
 
         if symbol not in market:
             continue
 
-        buy_p = trade.get("buy_price")
+        buy_p = trade.get("buy_price") or trade.get("buy")
         tp = trade.get("tp")
         sl = trade.get("sl")
 
-        if not all([name, buy_p, tp, sl]):
+        if not all([name, symbol, buy_p, tp, sl]):
             continue
 
         high_p = market[symbol]["high"]
         low_p = market[symbol]["low"]
 
+        # 조건부 자동매도 기준
         if high_p >= tp and low_p > sl:
-
             expected_profit = ((tp - buy_p) / buy_p) * 100
-
             success_count += 1
 
             report_body += (
@@ -169,9 +174,19 @@ def run_performance_check():
                 f"결과 : ✅ <b>축하합니다 수익 달성! (+{expected_profit:.1f}%)</b>\n\n"
             )
 
-    if success_count > 0:
+            today_results.append({
+                "date": today,
+                "name": name,
+                "symbol": symbol,
+                "profit": round(expected_profit, 1)
+            })
 
-        avg_profit, total_profit, month_success = calculate_month_stats(trades, market)
+    if success_count > 0:
+        history = load_performance_history()
+        history = merge_today_results(history, today_results)
+        save_performance_history(history)
+
+        avg_profit, total_profit, month_success = calculate_month_stats(history)
 
         summary = (
             "\n━━━━━━━━━━━━━━\n"
@@ -192,11 +207,9 @@ def run_performance_check():
         )
 
         send_telegram(final_report)
-
         print(f"✅ 수익 인증 리포트 전송 완료 ({success_count}건)")
 
     else:
-
         print("⏳ 오늘은 목표가 달성 종목이 없습니다.")
 
 

@@ -25,11 +25,10 @@ def send_telegram(msg):
 
         if r.status_code != 200:
             return False
-
         return True
 
     except Exception as e:
-        print("텔레그램 예외:", e)
+        print("텔레그램 전송 예외:", e)
         return False
 
 
@@ -41,13 +40,27 @@ def load_sent():
         with open(SENT_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
-        print("sent 파일 로드 실패:", e)
+        print("sent_stocks.json 로드 실패:", e)
         return {}
 
 
 def save_sent(data):
     with open(SENT_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def parse_change_value(change_text):
+    try:
+        cleaned = (
+            change_text.replace("%", "")
+            .replace("+", "")
+            .replace("▲", "")
+            .replace("상한가", "")
+            .strip()
+        )
+        return float(cleaned)
+    except:
+        return None
 
 
 def detect():
@@ -77,6 +90,7 @@ def detect():
 
     today_sent = sent_data[today]
     sent_count = 0
+    candidate_count = 0
 
     for row in rows:
         cols = row.find_all("td")
@@ -84,22 +98,27 @@ def detect():
         if len(cols) < 7:
             continue
 
-        name = cols[1].text.strip()
-        price = cols[2].text.strip()
-        change = cols[3].text.strip()
-        volume = cols[5].text.strip()
+        name = cols[1].get_text(strip=True)
+        price = cols[2].get_text(strip=True)
+        change = cols[3].get_text(strip=True)
+        volume = cols[5].get_text(strip=True)
 
-        print("후보:", name, price, change, volume)
-
-        try:
-            change_val = float(change.replace("%", "").replace("+", "").replace("▲", "").strip())
-        except Exception:
+        if not name:
             continue
 
-        # 테스트용 임계값
-        if change_val < 10:
+        change_val = parse_change_value(change)
+        if change_val is None:
             continue
 
+        print(f"후보 확인 | 종목: {name} | 현재가: {price} | 등락률: {change} | 거래량: {volume}")
+
+        # 운영용 기준: 7% 이상
+        if change_val < 7:
+            continue
+
+        candidate_count += 1
+
+        # 당일 중복 발송 방지
         if name in today_sent:
             print("중복 제외:", name)
             continue
@@ -109,10 +128,9 @@ def detect():
 <b>{name}</b>
 현재가 : {price}원
 상승률 : <b>{change}</b>
-
 거래량 : {volume}
 
-📊 단기 모멘텀 발생 가능
+📊 단기 모멘텀 구간으로 보입니다.
 """
 
         ok = send_telegram(msg)
@@ -127,7 +145,11 @@ def detect():
     sent_data[today] = today_sent
     save_sent(sent_data)
 
+    print("조건 충족 후보 수:", candidate_count)
     print("총 전송 건수:", sent_count)
+
+    if candidate_count == 0:
+        print("조건 충족 종목 없음")
 
 
 if __name__ == "__main__":

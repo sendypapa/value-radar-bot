@@ -18,7 +18,11 @@ TRADES_FILE = "trades.json"
 # 모델 선택
 # =============================
 def find_best_model(client):
-    models = [m.name for m in client.models.list()]
+    try:
+        models = [m.name for m in client.models.list()]
+    except Exception as e:
+        print("🚨 모델 목록 조회 실패:", e)
+        return "models/gemini-2.5-flash"
 
     priorities = [
         "models/gemini-3.1-flash-lite-preview",
@@ -32,7 +36,7 @@ def find_best_model(client):
             print("📡 모델 선택:", p)
             return p
 
-    return models[0]
+    return models[0] if models else "models/gemini-2.5-flash"
 
 
 # =============================
@@ -45,7 +49,8 @@ def load_trades():
     try:
         with open(TRADES_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
-    except:
+    except Exception as e:
+        print("🚨 trades.json 로드 실패:", e)
         return []
 
 
@@ -66,41 +71,12 @@ def get_recent_symbols(trades):
             d = datetime.strptime(t["date"], "%m월 %d일")
             d = d.replace(year=today.year)
 
-            if (today - d).days <= 3:
+            if 0 <= (today - d).days <= 3:
                 recent.add(t["symbol"])
         except:
             pass
 
     return recent
-
-
-# =============================
-# 종목 선정
-# =============================
-def get_stocks(trades):
-    df = fdr.StockListing("KOSDAQ")
-
-    marcap = next((c for c in df.columns if c.lower() == "marcap"), "Marcap")
-    amount = next((c for c in df.columns if c.lower() == "amount"), "Amount")
-
-    filtered = df[(df[marcap] >= 100000000000) & (df[marcap] <= 800000000000)]
-    top = filtered.sort_values(by=amount, ascending=False).head(30)
-
-    recent_symbols = get_recent_symbols(trades)
-    stocks = []
-
-    for _, r in top.iterrows():
-        symbol = r["Code"]
-
-        if symbol in recent_symbols:
-            continue
-
-        stocks.append({
-            "symbol": symbol,
-            "name": r["Name"]
-        })
-
-    return stocks[:10]
 
 
 # =============================
@@ -122,6 +98,43 @@ def volume_filter(symbol):
 
 
 # =============================
+# 종목 선정
+# 거래량 필터를 여기서 미리 적용
+# =============================
+def get_stocks(trades):
+    df = fdr.StockListing("KOSDAQ")
+
+    marcap = next((c for c in df.columns if c.lower() == "marcap"), "Marcap")
+    amount = next((c for c in df.columns if c.lower() == "amount"), "Amount")
+
+    filtered = df[(df[marcap] >= 100000000000) & (df[marcap] <= 800000000000)]
+    top = filtered.sort_values(by=amount, ascending=False).head(120)
+
+    recent_symbols = get_recent_symbols(trades)
+    stocks = []
+
+    for _, r in top.iterrows():
+        symbol = r["Code"]
+
+        if symbol in recent_symbols:
+            continue
+
+        if not volume_filter(symbol):
+            continue
+
+        stocks.append({
+            "symbol": symbol,
+            "name": r["Name"]
+        })
+
+        if len(stocks) >= 10:
+            break
+
+    print(f"📋 최종 추천 후보 수: {len(stocks)}")
+    return stocks
+
+
+# =============================
 # 가격 로드
 # =============================
 def load_prices(symbols):
@@ -129,11 +142,7 @@ def load_prices(symbols):
 
     for s in symbols:
         try:
-            if not volume_filter(s):
-                continue
-
             df = fdr.DataReader(s).tail(1)
-
             if not df.empty:
                 prices[s] = int(df["Close"].iloc[0])
         except:
@@ -178,14 +187,17 @@ def normalize_analysis_tone(text):
 
     text = re.sub(r"\s+", " ", text).strip()
 
-    bad_endings = ["다.", "네.", "세.", "지.", "군.", "게."]
-    good_endings = ("입니다.", "보입니다.", "판단됩니다.", "좋겠습니다.", "유효하겠습니다.", "가능성이 있습니다.")
+    bad_patterns = ["일세", "하네", "보게", "하였네"]
+    for bad in bad_patterns:
+        text = text.replace(bad, "")
 
-    if not text.endswith(good_endings):
-        if any(text.endswith(x) for x in bad_endings):
-            text = text[:-1] + "니다."
+    if not text.endswith(("입니다.", "보입니다.", "판단됩니다.", "좋겠습니다.", "유효하겠습니다.", "가능성이 있습니다.")):
+        if text.endswith("."):
+            pass
         else:
             text += "."
+        if not text.endswith(("입니다.", "보입니다.", "판단됩니다.", "좋겠습니다.", "유효하겠습니다.", "가능성이 있습니다.")):
+            text = text.rstrip(".") + " 보입니다."
 
     return text
 
@@ -196,14 +208,14 @@ def normalize_analysis_tone(text):
 def analyze_all(client, model, stocks, prices):
     valid_stocks = [s for s in stocks if s["symbol"] in prices]
 
+    if not valid_stocks:
+        return {}
+
     stock_list = ""
     for s in valid_stocks:
         name = s["name"]
         price = prices.get(s["symbol"], 0)
         stock_list += f"{name} 현재가:{price}\n"
-
-    if not stock_list.strip():
-        return {}
 
     prompt = f"""
 너는 밸류레이더 소속의 전문 애널리스트다.
@@ -216,9 +228,8 @@ def analyze_all(client, model, stocks, prices):
 - 반드시 정중한 존댓말만 사용
 - 반말, 고어체, 옛말투, 과장된 표현 절대 금지
 - "일세", "하네", "보게", "자리일세", "하였네" 같은 표현 절대 금지
-- 텔레그램 투자 리포트에 맞는 짧고 단정한 문장으로 작성
 - 각 종목마다 반드시 '분석:'으로 시작하는 줄을 포함
-- 분석은 2문장 이내로 작성
+- 분석은 1~2문장 이내로 작성
 - 특수문자 *, # 사용 금지
 
 출력 형식은 반드시 아래 형식을 정확히 지켜라.
@@ -247,65 +258,51 @@ def analyze_all(client, model, stocks, prices):
     print("=======================")
 
     result = {}
-    lines = text.split("\n")
+    lines = [x.strip() for x in text.split("\n") if x.strip()]
     stock_names = [s["name"] for s in valid_stocks]
 
     current = None
     data = {}
-    analysis_mode = False
 
-    for raw_line in lines:
-        line = raw_line.strip()
-
-        if not line:
-            continue
-
-        matched_name = None
+    for line in lines:
+        matched = None
         for name in stock_names:
-            if line == name or line.startswith(name):
-                matched_name = name
+            if line == name:
+                matched = name
                 break
 
-        if matched_name:
+        if matched:
             if current:
                 result[current] = data
-            current = matched_name
+            current = matched
             data = {}
-            analysis_mode = False
             continue
 
         if not current:
             continue
 
-        if "목표가" in line:
+        if line.startswith("목표가"):
             num = extract_number(line)
-            if "%" in line or not num or num < 1000:
-                data["tp"] = None
-            else:
-                data["tp"] = num
-            analysis_mode = False
+            data["tp"] = num if num and num >= 1000 else None
             continue
 
-        if "손절가" in line:
+        if line.startswith("손절가"):
             num = extract_number(line)
             if "%" in line or not num or num < 1000:
                 data["sl"] = None
             else:
                 data["sl"] = num
-            analysis_mode = False
             continue
 
-        if any(keyword in line for keyword in ["분석", "분석 포인트", "코멘트", "설명"]):
+        if line.startswith("분석"):
             if ":" in line:
                 data["analysis"] = line.split(":", 1)[1].strip()
             else:
                 data["analysis"] = ""
-            analysis_mode = True
             continue
 
-        if analysis_mode:
-            existing = data.get("analysis", "")
-            data["analysis"] = (existing + " " + line).strip()
+        if "analysis" in data:
+            data["analysis"] = (data["analysis"] + " " + line).strip()
 
     if current:
         result[current] = data
@@ -327,8 +324,12 @@ def send_telegram(text):
 
     try:
         r = requests.post(url, json=payload, timeout=10)
-        return r.status_code == 200
-    except:
+        if r.status_code != 200:
+            print("🚨 텔레그램 전송 실패:", r.status_code, r.text)
+            return False
+        return True
+    except Exception as e:
+        print("🚨 텔레그램 전송 예외:", e)
         return False
 
 
@@ -372,12 +373,17 @@ if __name__ == "__main__":
 
     existing_trades = load_trades()
     stocks = get_stocks(existing_trades)
+
+    if not stocks:
+        print("🚨 추천 가능한 종목이 없습니다.")
+        raise SystemExit(0)
+
     symbols = [s["symbol"] for s in stocks]
     prices = load_prices(symbols)
 
     if not prices:
         print("🚨 가격 데이터를 불러오지 못했습니다.")
-        exit()
+        raise SystemExit(0)
 
     analysis = analyze_all(client, model, stocks, prices)
 
@@ -403,8 +409,7 @@ if __name__ == "__main__":
         if not sl or sl >= price or sl < int(price * 0.90):
             sl = int(price * 0.97)
 
-        text = data.get("analysis", "")
-        text = normalize_analysis_tone(text)
+        text = normalize_analysis_tone(data.get("analysis", ""))
 
         msg = make_message(name, price, tp, sl, text)
 

@@ -10,12 +10,8 @@ TRADES_FILE = "trades.json"
 PERFORMANCE_FILE = "performance_history.json"
 
 
-# ==========================
-# 텔레그램 전송
-# ==========================
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-
     payload = {
         "chat_id": CHAT_ID,
         "text": text,
@@ -30,13 +26,9 @@ def send_telegram(text):
         print("🚨 텔레그램 전송 실패:", e)
 
 
-# ==========================
-# JSON 로드 / 저장
-# ==========================
-def load_json_file(path, default):
+def load_json(path, default):
     if not os.path.exists(path):
         return default
-
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -44,72 +36,76 @@ def load_json_file(path, default):
         return default
 
 
-def save_json_file(path, data):
+def save_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-# ==========================
-# 장부 로드
-# ==========================
 def load_trades():
-    return load_json_file(TRADES_FILE, [])
+    return load_json(TRADES_FILE, [])
 
 
 def load_performance_history():
-    return load_json_file(PERFORMANCE_FILE, [])
+    return load_json(PERFORMANCE_FILE, [])
 
 
 def save_performance_history(data):
-    save_json_file(PERFORMANCE_FILE, data)
+    save_json(PERFORMANCE_FILE, data)
 
 
-# ==========================
-# 오늘 가격 데이터 조회
-# ==========================
-def load_market_data(symbols):
-    market = {}
-
-    for s in symbols:
-        try:
-            df = fdr.DataReader(s).tail(1)
-
-            if not df.empty:
-                market[s] = {
-                    "high": float(df["High"].iloc[0]),
-                    "low": float(df["Low"].iloc[0])
-                }
-        except:
-            continue
-
-    return market
+def parse_trade_date(date_str):
+    try:
+        today = datetime.now()
+        d = datetime.strptime(date_str, "%m월 %d일")
+        return d.replace(year=today.year)
+    except:
+        return None
 
 
-# ==========================
-# 월간 성과 계산
-# performance_history 기준
-# ==========================
-def calculate_month_stats(performance_history):
+def get_latest_trade_date(trades):
+    dates = []
+    for t in trades:
+        d = parse_trade_date(t.get("date", ""))
+        if d:
+            dates.append(d)
+    return max(dates) if dates else None
+
+
+_market_cache = {}
+
+def get_market_data(symbol):
+    if symbol in _market_cache:
+        return _market_cache[symbol]
+
+    try:
+        df = fdr.DataReader(symbol).tail(1)
+        if df.empty:
+            return None
+
+        row = df.iloc[-1]
+        data = {
+            "high": float(row["High"]),
+            "low": float(row["Low"])
+        }
+        _market_cache[symbol] = data
+        return data
+    except:
+        return None
+
+
+def calculate_month_stats(history):
     current_month = datetime.now().strftime("%m")
+    monthly = [x for x in history if x.get("date", "").startswith(current_month)]
 
-    monthly_records = [
-        x for x in performance_history
-        if x.get("date", "").startswith(current_month)
-    ]
-
-    profits = [x.get("profit", 0) for x in monthly_records]
+    profits = [float(x.get("profit", 0)) for x in monthly]
 
     avg_profit = sum(profits) / len(profits) if profits else 0
     total_profit = sum(profits) if profits else 0
-    success_count = len(monthly_records)
+    success_count = len(monthly)
 
     return avg_profit, total_profit, success_count
 
 
-# ==========================
-# 오늘 성공 종목을 성과 장부에 반영
-# 중복 저장 방지
-# ==========================
 def merge_today_results(history, today_results):
     existing_keys = {
         (x.get("date"), x.get("symbol"), round(float(x.get("profit", 0)), 1))
@@ -124,9 +120,6 @@ def merge_today_results(history, today_results):
     return history
 
 
-# ==========================
-# 성과 리포트
-# ==========================
 def run_performance_check():
     trades = load_trades()
 
@@ -137,20 +130,23 @@ def run_performance_check():
     today = datetime.now().strftime("%m월 %d일")
     header = f"📢 <b>{today} 매매 결과 리포트</b>\n------------------------\n"
 
-    symbols = list({t["symbol"] for t in trades if "symbol" in t})
-    market = load_market_data(symbols)
+    latest_trade_date = get_latest_trade_date(trades)
+    if not latest_trade_date:
+        print("📝 유효한 추천 날짜 없음")
+        return
+
+    latest_trade_str = latest_trade_date.strftime("%m월 %d일")
+
+    # 본문은 직전 추천일 종목만
+    target_trades = [t for t in trades if t.get("date") == latest_trade_str]
 
     report_body = ""
     success_count = 0
     today_results = []
 
-    for trade in trades:
+    for trade in target_trades:
         name = trade.get("name")
         symbol = trade.get("symbol")
-
-        if symbol not in market:
-            continue
-
         buy_p = trade.get("buy_price") or trade.get("buy")
         tp = trade.get("tp")
         sl = trade.get("sl")
@@ -158,10 +154,13 @@ def run_performance_check():
         if not all([name, symbol, buy_p, tp, sl]):
             continue
 
-        high_p = market[symbol]["high"]
-        low_p = market[symbol]["low"]
+        market = get_market_data(symbol)
+        if not market:
+            continue
 
-        # 조건부 자동매도 기준
+        high_p = market["high"]
+        low_p = market["low"]
+
         if high_p >= tp and low_p > sl:
             expected_profit = ((tp - buy_p) / buy_p) * 100
             success_count += 1
@@ -208,13 +207,9 @@ def run_performance_check():
 
         send_telegram(final_report)
         print(f"✅ 수익 인증 리포트 전송 완료 ({success_count}건)")
-
     else:
         print("⏳ 오늘은 목표가 달성 종목이 없습니다.")
 
 
-# ==========================
-# 실행
-# ==========================
 if __name__ == "__main__":
     run_performance_check()

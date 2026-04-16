@@ -2049,5 +2049,95 @@
         "tp": 5649,
         "sl": 5121,
         "expected_profit": 6.99
+    },
+    {
+        "date": "04월 16일",
+        "name": "아이씨티케이",
+        "symbol": "456010",
+        "buy_price": 21350,
+        "tp": 22630,
+        "sl": 20710,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "04월 16일",
+        "name": "큐에스아이",
+        "symbol": "066310",
+        "buy_price": 17870,
+        "tp": 18940,
+        "sl": 17330,
+        "expected_profit": 5.99
+    },
+    {
+        "date": "04월 16일",
+        "name": "덕산하이메탈",
+        "symbol": "077360",
+        "buy_price": 16410,
+        "tp": 17390,
+        "sl": 15910,
+        "expected_profit": 5.97
+    },
+    {
+        "date": "04월 16일",
+        "name": "서남",
+        "symbol": "294630",
+        "buy_price": 5670,
+        "tp": 6010,
+        "sl": 5500,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "04월 16일",
+        "name": "비츠로테크",
+        "symbol": "042370",
+        "buy_price": 17490,
+        "tp": 18540,
+        "sl": 16960,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "04월 16일",
+        "name": "라온시큐어",
+        "symbol": "042510",
+        "buy_price": 15410,
+        "tp": 16330,
+        "sl": 14940,
+        "expected_profit": 5.97
+    },
+    {
+        "date": "04월 16일",
+        "name": "샌즈랩",
+        "symbol": "411080",
+        "buy_price": 8180,
+        "tp": 8670,
+        "sl": 7930,
+        "expected_profit": 5.99
+    },
+    {
+        "date": "04월 16일",
+        "name": "드림시큐리티",
+        "symbol": "203650",
+        "buy_price": 3545,
+        "tp": 3757,
+        "sl": 3438,
+        "expected_profit": 5.98
+    },
+    {
+        "date": "04월 16일",
+        "name": "케이사인",
+        "symbol": "192250",
+        "buy_price": 15880,
+        "tp": 16830,
+        "sl": 15400,
+        "expected_profit": 5.98
+    },
+    {
+        "date": "04월 16일",
+        "name": "미코",
+        "symbol": "059090",
+        "buy_price": 20700,
+        "tp": 21940,
+        "sl": 20070,
+        "expected_profit": 5.99
     }
 ]

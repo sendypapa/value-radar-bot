@@ -2409,5 +2409,95 @@
         "tp": 8313,
         "sl": 7536,
         "expected_profit": 6.99
+    },
+    {
+        "date": "04월 22일",
+        "name": "오픈베이스",
+        "symbol": "049480",
+        "buy_price": 3600,
+        "tp": 3880,
+        "sl": 3490,
+        "expected_profit": 7.78
+    },
+    {
+        "date": "04월 22일",
+        "name": "그린광학",
+        "symbol": "0015G0",
+        "buy_price": 35850,
+        "tp": 38700,
+        "sl": 34770,
+        "expected_profit": 7.95
+    },
+    {
+        "date": "04월 22일",
+        "name": "중앙첨단소재",
+        "symbol": "051980",
+        "buy_price": 2230,
+        "tp": 2410,
+        "sl": 2160,
+        "expected_profit": 8.07
+    },
+    {
+        "date": "04월 22일",
+        "name": "핑거",
+        "symbol": "163730",
+        "buy_price": 18070,
+        "tp": 19510,
+        "sl": 17520,
+        "expected_profit": 7.97
+    },
+    {
+        "date": "04월 22일",
+        "name": "스맥",
+        "symbol": "099440",
+        "buy_price": 4340,
+        "tp": 4680,
+        "sl": 4210,
+        "expected_profit": 7.83
+    },
+    {
+        "date": "04월 22일",
+        "name": "더블유씨피",
+        "symbol": "393890",
+        "buy_price": 20050,
+        "tp": 21650,
+        "sl": 19440,
+        "expected_profit": 7.98
+    },
+    {
+        "date": "04월 22일",
+        "name": "국일제지",
+        "symbol": "078130",
+        "buy_price": 448,
+        "tp": 479,
+        "sl": 434,
+        "expected_profit": 6.92
+    },
+    {
+        "date": "04월 22일",
+        "name": "이브이첨단소재",
+        "symbol": "131400",
+        "buy_price": 2065,
+        "tp": 2230,
+        "sl": 2000,
+        "expected_profit": 7.99
+    },
+    {
+        "date": "04월 22일",
+        "name": "제이씨케미칼",
+        "symbol": "137950",
+        "buy_price": 4870,
+        "tp": 5260,
+        "sl": 4720,
+        "expected_profit": 8.01
+    },
+    {
+        "date": "04월 22일",
+        "name": "삼양컴텍",
+        "symbol": "484590",
+        "buy_price": 14100,
+        "tp": 15220,
+        "sl": 13670,
+        "expected_profit": 7.94
     }
 ]

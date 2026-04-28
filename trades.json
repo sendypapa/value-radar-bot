@@ -2769,5 +2769,95 @@
         "tp": 42479,
         "sl": 38409,
         "expected_profit": 7.0
+    },
+    {
+        "date": "04월 28일",
+        "name": "DSC인베스트먼트",
+        "symbol": "241520",
+        "buy_price": 18190,
+        "tp": 19460,
+        "sl": 17640,
+        "expected_profit": 6.98
+    },
+    {
+        "date": "04월 28일",
+        "name": "케이에스피",
+        "symbol": "073010",
+        "buy_price": 6100,
+        "tp": 6520,
+        "sl": 5910,
+        "expected_profit": 6.89
+    },
+    {
+        "date": "04월 28일",
+        "name": "세아메카닉스",
+        "symbol": "396300",
+        "buy_price": 5770,
+        "tp": 6170,
+        "sl": 5590,
+        "expected_profit": 6.93
+    },
+    {
+        "date": "04월 28일",
+        "name": "엔비알모션",
+        "symbol": "0004V0",
+        "buy_price": 25300,
+        "tp": 27070,
+        "sl": 24540,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "04월 28일",
+        "name": "화성밸브",
+        "symbol": "039610",
+        "buy_price": 10200,
+        "tp": 10910,
+        "sl": 9890,
+        "expected_profit": 6.96
+    },
+    {
+        "date": "04월 28일",
+        "name": "한라캐스트",
+        "symbol": "125490",
+        "buy_price": 17480,
+        "tp": 18690,
+        "sl": 16950,
+        "expected_profit": 6.92
+    },
+    {
+        "date": "04월 28일",
+        "name": "아진산업",
+        "symbol": "013310",
+        "buy_price": 3760,
+        "tp": 4020,
+        "sl": 3640,
+        "expected_profit": 6.91
+    },
+    {
+        "date": "04월 28일",
+        "name": "동아엘텍",
+        "symbol": "088130",
+        "buy_price": 11920,
+        "tp": 12750,
+        "sl": 11560,
+        "expected_profit": 6.96
+    },
+    {
+        "date": "04월 28일",
+        "name": "서울바이오시스",
+        "symbol": "092190",
+        "buy_price": 6730,
+        "tp": 7190,
+        "sl": 6520,
+        "expected_profit": 6.84
+    },
+    {
+        "date": "04월 28일",
+        "name": "나우IB",
+        "symbol": "293580",
+        "buy_price": 3235,
+        "tp": 3460,
+        "sl": 3130,
+        "expected_profit": 6.96
     }
 ]

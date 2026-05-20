@@ -4209,5 +4209,95 @@
         "tp": 32635,
         "sl": 29585,
         "expected_profit": 7.0
+    },
+    {
+        "date": "05월 20일",
+        "name": "빛과전자",
+        "symbol": "069540",
+        "buy_price": 5140,
+        "tp": 5450,
+        "sl": 4985,
+        "expected_profit": 6.03
+    },
+    {
+        "date": "05월 20일",
+        "name": "수젠텍",
+        "symbol": "253840",
+        "buy_price": 7630,
+        "tp": 8090,
+        "sl": 7400,
+        "expected_profit": 6.03
+    },
+    {
+        "date": "05월 20일",
+        "name": "이랜시스",
+        "symbol": "264850",
+        "buy_price": 6900,
+        "tp": 7315,
+        "sl": 6695,
+        "expected_profit": 6.01
+    },
+    {
+        "date": "05월 20일",
+        "name": "제닉스로보틱스",
+        "symbol": "381620",
+        "buy_price": 11490,
+        "tp": 12180,
+        "sl": 11145,
+        "expected_profit": 6.01
+    },
+    {
+        "date": "05월 20일",
+        "name": "빛샘전자",
+        "symbol": "072950",
+        "buy_price": 14080,
+        "tp": 14925,
+        "sl": 13655,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "05월 20일",
+        "name": "기가레인",
+        "symbol": "049080",
+        "buy_price": 1497,
+        "tp": 1585,
+        "sl": 1450,
+        "expected_profit": 5.88
+    },
+    {
+        "date": "05월 20일",
+        "name": "코칩",
+        "symbol": "126730",
+        "buy_price": 20200,
+        "tp": 21410,
+        "sl": 19595,
+        "expected_profit": 5.99
+    },
+    {
+        "date": "05월 20일",
+        "name": "KBI메탈",
+        "symbol": "024840",
+        "buy_price": 5300,
+        "tp": 5620,
+        "sl": 5140,
+        "expected_profit": 6.04
+    },
+    {
+        "date": "05월 20일",
+        "name": "한국첨단소재",
+        "symbol": "062970",
+        "buy_price": 2745,
+        "tp": 2910,
+        "sl": 2665,
+        "expected_profit": 6.01
+    },
+    {
+        "date": "05월 20일",
+        "name": "머큐리",
+        "symbol": "100590",
+        "buy_price": 7200,
+        "tp": 7630,
+        "sl": 6985,
+        "expected_profit": 5.97
     }
 ]

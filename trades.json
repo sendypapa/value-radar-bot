@@ -4659,5 +4659,95 @@
         "tp": 5745,
         "sl": 5208,
         "expected_profit": 6.98
+    },
+    {
+        "date": "05월 27일",
+        "name": "라온로보틱스",
+        "symbol": "232680",
+        "buy_price": 22500,
+        "tp": 24075,
+        "sl": 21825,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "05월 27일",
+        "name": "나노팀",
+        "symbol": "417010",
+        "buy_price": 12560,
+        "tp": 13439,
+        "sl": 12183,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "05월 27일",
+        "name": "피델릭스",
+        "symbol": "032580",
+        "buy_price": 6280,
+        "tp": 6719,
+        "sl": 6091,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "05월 27일",
+        "name": "저스템",
+        "symbol": "417840",
+        "buy_price": 18990,
+        "tp": 20319,
+        "sl": 18420,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "05월 27일",
+        "name": "차백신연구소",
+        "symbol": "261780",
+        "buy_price": 3960,
+        "tp": 4237,
+        "sl": 3841,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "05월 27일",
+        "name": "파워넷",
+        "symbol": "037030",
+        "buy_price": 7510,
+        "tp": 8035,
+        "sl": 7284,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "05월 27일",
+        "name": "안국약품",
+        "symbol": "001540",
+        "buy_price": 11280,
+        "tp": 12069,
+        "sl": 10941,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "05월 27일",
+        "name": "오텍",
+        "symbol": "067170",
+        "buy_price": 4075,
+        "tp": 4360,
+        "sl": 3952,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "05월 27일",
+        "name": "에이팩트",
+        "symbol": "200470",
+        "buy_price": 10360,
+        "tp": 11085,
+        "sl": 10049,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "05월 27일",
+        "name": "유니셈",
+        "symbol": "036200",
+        "buy_price": 12250,
+        "tp": 13107,
+        "sl": 11882,
+        "expected_profit": 7.0
     }
 ]

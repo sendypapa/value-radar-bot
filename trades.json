@@ -5919,5 +5919,95 @@
         "tp": 9780,
         "sl": 8860,
         "expected_profit": 7.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "서산",
+        "symbol": "079650",
+        "buy_price": 5690,
+        "tp": 6145,
+        "sl": 5520,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "유진기업",
+        "symbol": "023410",
+        "buy_price": 3625,
+        "tp": 3915,
+        "sl": 3515,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "세미티에스",
+        "symbol": "0017J0",
+        "buy_price": 4890,
+        "tp": 5280,
+        "sl": 4745,
+        "expected_profit": 7.98
+    },
+    {
+        "date": "06월 25일",
+        "name": "삼기에너지솔루션즈",
+        "symbol": "419050",
+        "buy_price": 1887,
+        "tp": 2038,
+        "sl": 1830,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "와이제이링크",
+        "symbol": "209640",
+        "buy_price": 4665,
+        "tp": 5038,
+        "sl": 4525,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "로킷헬스케어",
+        "symbol": "376900",
+        "buy_price": 40000,
+        "tp": 43200,
+        "sl": 38800,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "마키나락스",
+        "symbol": "477850",
+        "buy_price": 16430,
+        "tp": 17745,
+        "sl": 15935,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "저스템",
+        "symbol": "417840",
+        "buy_price": 14310,
+        "tp": 15455,
+        "sl": 13880,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "아이티센글로벌",
+        "symbol": "124500",
+        "buy_price": 21800,
+        "tp": 23545,
+        "sl": 21145,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "06월 25일",
+        "name": "빛과전자",
+        "symbol": "069540",
+        "buy_price": 2365,
+        "tp": 2554,
+        "sl": 2294,
+        "expected_profit": 7.99
     }
 ]

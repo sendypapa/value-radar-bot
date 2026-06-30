@@ -6189,5 +6189,95 @@
         "tp": 26200,
         "sl": 23960,
         "expected_profit": 6.07
+    },
+    {
+        "date": "06월 30일",
+        "name": "한성크린텍",
+        "symbol": "066980",
+        "buy_price": 2485,
+        "tp": 2650,
+        "sl": 2410,
+        "expected_profit": 6.64
+    },
+    {
+        "date": "06월 30일",
+        "name": "골프존홀딩스",
+        "symbol": "121440",
+        "buy_price": 6630,
+        "tp": 7070,
+        "sl": 6430,
+        "expected_profit": 6.64
+    },
+    {
+        "date": "06월 30일",
+        "name": "시노펙스",
+        "symbol": "025320",
+        "buy_price": 6030,
+        "tp": 6450,
+        "sl": 5850,
+        "expected_profit": 6.97
+    },
+    {
+        "date": "06월 30일",
+        "name": "엠케이전자",
+        "symbol": "033160",
+        "buy_price": 18950,
+        "tp": 20240,
+        "sl": 18380,
+        "expected_profit": 6.81
+    },
+    {
+        "date": "06월 30일",
+        "name": "에이치브이엠",
+        "symbol": "295310",
+        "buy_price": 57900,
+        "tp": 61950,
+        "sl": 56160,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "06월 30일",
+        "name": "유니슨",
+        "symbol": "018000",
+        "buy_price": 1137,
+        "tp": 1215,
+        "sl": 1103,
+        "expected_profit": 6.86
+    },
+    {
+        "date": "06월 30일",
+        "name": "저스템",
+        "symbol": "417840",
+        "buy_price": 14960,
+        "tp": 15990,
+        "sl": 14510,
+        "expected_profit": 6.89
+    },
+    {
+        "date": "06월 30일",
+        "name": "싸이맥스",
+        "symbol": "160980",
+        "buy_price": 39850,
+        "tp": 42640,
+        "sl": 38650,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "06월 30일",
+        "name": "코칩",
+        "symbol": "126730",
+        "buy_price": 16800,
+        "tp": 17970,
+        "sl": 16290,
+        "expected_profit": 6.96
+    },
+    {
+        "date": "06월 30일",
+        "name": "RF머트리얼즈",
+        "symbol": "327260",
+        "buy_price": 53000,
+        "tp": 56710,
+        "sl": 51410,
+        "expected_profit": 7.0
     }
 ]

@@ -6279,5 +6279,95 @@
         "tp": 56710,
         "sl": 51410,
         "expected_profit": 7.0
+    },
+    {
+        "date": "07월 01일",
+        "name": "유진기업",
+        "symbol": "023410",
+        "buy_price": 4515,
+        "tp": 4830,
+        "sl": 4380,
+        "expected_profit": 6.98
+    },
+    {
+        "date": "07월 01일",
+        "name": "한양이엔지",
+        "symbol": "045100",
+        "buy_price": 38400,
+        "tp": 41080,
+        "sl": 37248,
+        "expected_profit": 6.98
+    },
+    {
+        "date": "07월 01일",
+        "name": "아모텍",
+        "symbol": "052710",
+        "buy_price": 24800,
+        "tp": 26536,
+        "sl": 24056,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 01일",
+        "name": "KBI메탈",
+        "symbol": "024840",
+        "buy_price": 4825,
+        "tp": 5162,
+        "sl": 4680,
+        "expected_profit": 6.98
+    },
+    {
+        "date": "07월 01일",
+        "name": "강동씨앤엘",
+        "symbol": "198440",
+        "buy_price": 1982,
+        "tp": 2120,
+        "sl": 1922,
+        "expected_profit": 6.96
+    },
+    {
+        "date": "07월 01일",
+        "name": "지엔씨에너지",
+        "symbol": "119850",
+        "buy_price": 27850,
+        "tp": 29795,
+        "sl": 27014,
+        "expected_profit": 6.98
+    },
+    {
+        "date": "07월 01일",
+        "name": "피델릭스",
+        "symbol": "032580",
+        "buy_price": 5700,
+        "tp": 6099,
+        "sl": 5529,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 01일",
+        "name": "성도이엔지",
+        "symbol": "037350",
+        "buy_price": 11200,
+        "tp": 11984,
+        "sl": 10864,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 01일",
+        "name": "인텍플러스",
+        "symbol": "064290",
+        "buy_price": 48500,
+        "tp": 51875,
+        "sl": 47045,
+        "expected_profit": 6.96
+    },
+    {
+        "date": "07월 01일",
+        "name": "코세스",
+        "symbol": "089890",
+        "buy_price": 37000,
+        "tp": 39590,
+        "sl": 35890,
+        "expected_profit": 7.0
     }
 ]

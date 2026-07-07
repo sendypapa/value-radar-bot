@@ -6549,5 +6549,95 @@
         "tp": 44400,
         "sl": 40250,
         "expected_profit": 6.99
+    },
+    {
+        "date": "07월 07일",
+        "name": "에스와이스틸텍",
+        "symbol": "365330",
+        "buy_price": 2070,
+        "tp": 2215,
+        "sl": 2008,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 07일",
+        "name": "강동씨앤엘",
+        "symbol": "198440",
+        "buy_price": 1801,
+        "tp": 1927,
+        "sl": 1747,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 07일",
+        "name": "비엘팜텍",
+        "symbol": "065170",
+        "buy_price": 3965,
+        "tp": 4243,
+        "sl": 3846,
+        "expected_profit": 7.01
+    },
+    {
+        "date": "07월 07일",
+        "name": "유진기업",
+        "symbol": "023410",
+        "buy_price": 3670,
+        "tp": 3927,
+        "sl": 3560,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 07일",
+        "name": "싸이맥스",
+        "symbol": "160980",
+        "buy_price": 30750,
+        "tp": 32900,
+        "sl": 29828,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "07월 07일",
+        "name": "위메이드맥스",
+        "symbol": "101730",
+        "buy_price": 4995,
+        "tp": 5345,
+        "sl": 4845,
+        "expected_profit": 7.01
+    },
+    {
+        "date": "07월 07일",
+        "name": "비나텍",
+        "symbol": "126340",
+        "buy_price": 82400,
+        "tp": 88168,
+        "sl": 79928,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 07일",
+        "name": "한스바이오메드",
+        "symbol": "042520",
+        "buy_price": 25550,
+        "tp": 27339,
+        "sl": 24784,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 07일",
+        "name": "알지노믹스",
+        "symbol": "476830",
+        "buy_price": 35100,
+        "tp": 37557,
+        "sl": 34047,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "07월 07일",
+        "name": "덕산하이메탈",
+        "symbol": "077360",
+        "buy_price": 8500,
+        "tp": 9095,
+        "sl": 8245,
+        "expected_profit": 7.0
     }
 ]

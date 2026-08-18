@@ -9069,5 +9069,95 @@
         "tp": 12330,
         "sl": 11110,
         "expected_profit": 7.69
+    },
+    {
+        "date": "08월 18일",
+        "name": "아난티",
+        "symbol": "025980",
+        "buy_price": 4500,
+        "tp": 4815,
+        "sl": 4365,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "레메디",
+        "symbol": "387690",
+        "buy_price": 13590,
+        "tp": 14405,
+        "sl": 13182,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "마이크로컨텍솔",
+        "symbol": "098120",
+        "buy_price": 37800,
+        "tp": 40068,
+        "sl": 36666,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "저스템",
+        "symbol": "417840",
+        "buy_price": 14150,
+        "tp": 14999,
+        "sl": 13725,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "대아티아이",
+        "symbol": "045390",
+        "buy_price": 3015,
+        "tp": 3196,
+        "sl": 2925,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "JW신약",
+        "symbol": "067290",
+        "buy_price": 2215,
+        "tp": 2348,
+        "sl": 2149,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "워트",
+        "symbol": "396470",
+        "buy_price": 6730,
+        "tp": 7134,
+        "sl": 6528,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "흥구석유",
+        "symbol": "024060",
+        "buy_price": 11400,
+        "tp": 12084,
+        "sl": 11058,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "인텍플러스",
+        "symbol": "064290",
+        "buy_price": 36250,
+        "tp": 38425,
+        "sl": 35163,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 18일",
+        "name": "리파인",
+        "symbol": "377450",
+        "buy_price": 16010,
+        "tp": 16971,
+        "sl": 15530,
+        "expected_profit": 6.0
     }
 ]

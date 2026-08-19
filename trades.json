@@ -9159,5 +9159,95 @@
         "tp": 16971,
         "sl": 15530,
         "expected_profit": 6.0
+    },
+    {
+        "date": "08월 19일",
+        "name": "KBI메탈",
+        "symbol": "024840",
+        "buy_price": 5980,
+        "tp": 6338,
+        "sl": 5801,
+        "expected_profit": 5.99
+    },
+    {
+        "date": "08월 19일",
+        "name": "코데즈컴바인",
+        "symbol": "047770",
+        "buy_price": 3635,
+        "tp": 3853,
+        "sl": 3526,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 19일",
+        "name": "져스텍",
+        "symbol": "153890",
+        "buy_price": 13910,
+        "tp": 14745,
+        "sl": 13493,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 19일",
+        "name": "비보존 제약",
+        "symbol": "082800",
+        "buy_price": 3320,
+        "tp": 3519,
+        "sl": 3220,
+        "expected_profit": 5.99
+    },
+    {
+        "date": "08월 19일",
+        "name": "신라젠",
+        "symbol": "215600",
+        "buy_price": 2285,
+        "tp": 2422,
+        "sl": 2216,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 19일",
+        "name": "위메이드맥스",
+        "symbol": "101730",
+        "buy_price": 4815,
+        "tp": 5104,
+        "sl": 4671,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 19일",
+        "name": "이랜시스",
+        "symbol": "264850",
+        "buy_price": 6340,
+        "tp": 6720,
+        "sl": 6150,
+        "expected_profit": 5.99
+    },
+    {
+        "date": "08월 19일",
+        "name": "베뉴지",
+        "symbol": "019010",
+        "buy_price": 5180,
+        "tp": 5491,
+        "sl": 5025,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 19일",
+        "name": "싸이맥스",
+        "symbol": "160980",
+        "buy_price": 29000,
+        "tp": 30740,
+        "sl": 28130,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 19일",
+        "name": "LB세미콘",
+        "symbol": "061970",
+        "buy_price": 5930,
+        "tp": 6286,
+        "sl": 5752,
+        "expected_profit": 6.0
     }
 ]

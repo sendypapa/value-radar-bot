@@ -9249,5 +9249,95 @@
         "tp": 6286,
         "sl": 5752,
         "expected_profit": 6.0
+    },
+    {
+        "date": "08월 20일",
+        "name": "다날",
+        "symbol": "064260",
+        "buy_price": 5090,
+        "tp": 5400,
+        "sl": 4935,
+        "expected_profit": 6.09
+    },
+    {
+        "date": "08월 20일",
+        "name": "마키나락스",
+        "symbol": "477850",
+        "buy_price": 27900,
+        "tp": 29550,
+        "sl": 27060,
+        "expected_profit": 5.91
+    },
+    {
+        "date": "08월 20일",
+        "name": "서산",
+        "symbol": "079650",
+        "buy_price": 5380,
+        "tp": 5700,
+        "sl": 5220,
+        "expected_profit": 5.95
+    },
+    {
+        "date": "08월 20일",
+        "name": "아이티센글로벌",
+        "symbol": "124500",
+        "buy_price": 31350,
+        "tp": 33230,
+        "sl": 30410,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 20일",
+        "name": "나이벡",
+        "symbol": "138610",
+        "buy_price": 19100,
+        "tp": 20240,
+        "sl": 18525,
+        "expected_profit": 5.97
+    },
+    {
+        "date": "08월 20일",
+        "name": "헥토파이낸셜",
+        "symbol": "234340",
+        "buy_price": 21450,
+        "tp": 22730,
+        "sl": 20805,
+        "expected_profit": 5.97
+    },
+    {
+        "date": "08월 20일",
+        "name": "더즌",
+        "symbol": "462860",
+        "buy_price": 2395,
+        "tp": 2538,
+        "sl": 2323,
+        "expected_profit": 5.97
+    },
+    {
+        "date": "08월 20일",
+        "name": "에이프릴바이오",
+        "symbol": "397030",
+        "buy_price": 21250,
+        "tp": 22525,
+        "sl": 20610,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 20일",
+        "name": "바이오니아",
+        "symbol": "064550",
+        "buy_price": 9500,
+        "tp": 10070,
+        "sl": 9215,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "08월 20일",
+        "name": "RF머트리얼즈",
+        "symbol": "327260",
+        "buy_price": 35250,
+        "tp": 37365,
+        "sl": 34190,
+        "expected_profit": 6.0
     }
 ]

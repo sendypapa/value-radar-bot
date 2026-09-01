@@ -1576,5 +1576,29 @@
         "name": "KBI메탈",
         "symbol": "024840",
         "profit": 5.9
+    },
+    {
+        "date": "09월 01일",
+        "name": "KBI메탈",
+        "symbol": "024840",
+        "profit": 6.0
+    },
+    {
+        "date": "09월 01일",
+        "name": "JW신약",
+        "symbol": "067290",
+        "profit": 6.0
+    },
+    {
+        "date": "09월 01일",
+        "name": "아로마티카",
+        "symbol": "0015N0",
+        "profit": 6.0
+    },
+    {
+        "date": "09월 01일",
+        "name": "온코닉테라퓨틱스",
+        "symbol": "476060",
+        "profit": 6.0
     }
 ]

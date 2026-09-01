@@ -9744,5 +9744,77 @@
         "tp": 16220,
         "sl": 14840,
         "expected_profit": 6.01
+    },
+    {
+        "date": "09월 01일",
+        "name": "피노",
+        "symbol": "033790",
+        "buy_price": 8640,
+        "tp": 9330,
+        "sl": 8380,
+        "expected_profit": 7.99
+    },
+    {
+        "date": "09월 01일",
+        "name": "매드업",
+        "symbol": "0039P0",
+        "buy_price": 9390,
+        "tp": 10140,
+        "sl": 9110,
+        "expected_profit": 7.99
+    },
+    {
+        "date": "09월 01일",
+        "name": "덕산테코피아",
+        "symbol": "317330",
+        "buy_price": 14010,
+        "tp": 15130,
+        "sl": 13590,
+        "expected_profit": 7.99
+    },
+    {
+        "date": "09월 01일",
+        "name": "흥구석유",
+        "symbol": "024060",
+        "buy_price": 10260,
+        "tp": 11080,
+        "sl": 9950,
+        "expected_profit": 7.99
+    },
+    {
+        "date": "09월 01일",
+        "name": "바이오니아",
+        "symbol": "064550",
+        "buy_price": 9490,
+        "tp": 10250,
+        "sl": 9200,
+        "expected_profit": 8.01
+    },
+    {
+        "date": "09월 01일",
+        "name": "강동씨앤엘",
+        "symbol": "198440",
+        "buy_price": 2235,
+        "tp": 2410,
+        "sl": 2168,
+        "expected_profit": 7.83
+    },
+    {
+        "date": "09월 01일",
+        "name": "더블유씨피",
+        "symbol": "393890",
+        "buy_price": 10870,
+        "tp": 11740,
+        "sl": 10540,
+        "expected_profit": 8.0
+    },
+    {
+        "date": "09월 01일",
+        "name": "오늘이엔엠",
+        "symbol": "192410",
+        "buy_price": 5090,
+        "tp": 5497,
+        "sl": 4937,
+        "expected_profit": 8.0
     }
 ]

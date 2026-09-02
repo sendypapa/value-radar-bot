@@ -9816,5 +9816,14 @@
         "tp": 5497,
         "sl": 4937,
         "expected_profit": 8.0
+    },
+    {
+        "date": "09월 02일",
+        "name": "대아티아이",
+        "symbol": "045390",
+        "buy_price": 3880,
+        "tp": 4110,
+        "sl": 3760,
+        "expected_profit": 5.93
     }
 ]

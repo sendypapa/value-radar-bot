@@ -9825,5 +9825,95 @@
         "tp": 4110,
         "sl": 3760,
         "expected_profit": 5.93
+    },
+    {
+        "date": "09월 06일",
+        "name": "원익",
+        "symbol": "032940",
+        "buy_price": 10050,
+        "tp": 10750,
+        "sl": 9750,
+        "expected_profit": 6.97
+    },
+    {
+        "date": "09월 06일",
+        "name": "우리기술투자",
+        "symbol": "041190",
+        "buy_price": 6220,
+        "tp": 6650,
+        "sl": 6030,
+        "expected_profit": 6.91
+    },
+    {
+        "date": "09월 06일",
+        "name": "헥토파이낸셜",
+        "symbol": "234340",
+        "buy_price": 25250,
+        "tp": 26950,
+        "sl": 24490,
+        "expected_profit": 6.73
+    },
+    {
+        "date": "09월 06일",
+        "name": "레메디",
+        "symbol": "387690",
+        "buy_price": 15750,
+        "tp": 16850,
+        "sl": 15270,
+        "expected_profit": 6.98
+    },
+    {
+        "date": "09월 06일",
+        "name": "아난티",
+        "symbol": "025980",
+        "buy_price": 5710,
+        "tp": 6110,
+        "sl": 5540,
+        "expected_profit": 7.01
+    },
+    {
+        "date": "09월 06일",
+        "name": "한라캐스트",
+        "symbol": "125490",
+        "buy_price": 10860,
+        "tp": 11620,
+        "sl": 10530,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "09월 06일",
+        "name": "로보스타",
+        "symbol": "090360",
+        "buy_price": 76400,
+        "tp": 81750,
+        "sl": 74100,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "09월 06일",
+        "name": "인텍플러스",
+        "symbol": "064290",
+        "buy_price": 40150,
+        "tp": 42960,
+        "sl": 38940,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "09월 06일",
+        "name": "갤럭시아머니트리",
+        "symbol": "094480",
+        "buy_price": 6120,
+        "tp": 6540,
+        "sl": 5930,
+        "expected_profit": 6.86
+    },
+    {
+        "date": "09월 06일",
+        "name": "페니트리움바이오",
+        "symbol": "187660",
+        "buy_price": 5850,
+        "tp": 6260,
+        "sl": 5670,
+        "expected_profit": 7.01
     }
 ]

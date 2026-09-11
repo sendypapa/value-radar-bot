@@ -9915,5 +9915,23 @@
         "tp": 6260,
         "sl": 5670,
         "expected_profit": 7.01
+    },
+    {
+        "date": "09월 11일",
+        "name": "에스투더블유",
+        "symbol": "488280",
+        "buy_price": 13500,
+        "tp": 14310,
+        "sl": 13095,
+        "expected_profit": 6.0
+    },
+    {
+        "date": "09월 11일",
+        "name": "엑스게이트",
+        "symbol": "356680",
+        "buy_price": 13030,
+        "tp": 13810,
+        "sl": 12640,
+        "expected_profit": 5.99
     }
 ]

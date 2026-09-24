@@ -9933,5 +9933,95 @@
         "tp": 13810,
         "sl": 12640,
         "expected_profit": 5.99
+    },
+    {
+        "date": "09월 24일",
+        "name": "엑스게이트",
+        "symbol": "356680",
+        "buy_price": 18320,
+        "tp": 19582,
+        "sl": 17770,
+        "expected_profit": 6.89
+    },
+    {
+        "date": "09월 24일",
+        "name": "빛샘전자",
+        "symbol": "072950",
+        "buy_price": 14030,
+        "tp": 14992,
+        "sl": 13609,
+        "expected_profit": 6.86
+    },
+    {
+        "date": "09월 24일",
+        "name": "나라스페이스테크놀로지",
+        "symbol": "478340",
+        "buy_price": 14050,
+        "tp": 15013,
+        "sl": 13628,
+        "expected_profit": 6.85
+    },
+    {
+        "date": "09월 24일",
+        "name": "레메디",
+        "symbol": "387690",
+        "buy_price": 18390,
+        "tp": 19657,
+        "sl": 17838,
+        "expected_profit": 6.89
+    },
+    {
+        "date": "09월 24일",
+        "name": "우리로",
+        "symbol": "046970",
+        "buy_price": 7890,
+        "tp": 8430,
+        "sl": 7653,
+        "expected_profit": 6.84
+    },
+    {
+        "date": "09월 24일",
+        "name": "우리넷",
+        "symbol": "115440",
+        "buy_price": 12120,
+        "tp": 12968,
+        "sl": 11756,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "09월 24일",
+        "name": "HT로보틱스",
+        "symbol": "396300",
+        "buy_price": 6010,
+        "tp": 6430,
+        "sl": 5830,
+        "expected_profit": 6.99
+    },
+    {
+        "date": "09월 24일",
+        "name": "삼기에너지솔루션즈",
+        "symbol": "419050",
+        "buy_price": 1884,
+        "tp": 2013,
+        "sl": 1827,
+        "expected_profit": 6.85
+    },
+    {
+        "date": "09월 24일",
+        "name": "엑시콘",
+        "symbol": "092870",
+        "buy_price": 43300,
+        "tp": 46331,
+        "sl": 42001,
+        "expected_profit": 7.0
+    },
+    {
+        "date": "09월 24일",
+        "name": "센서뷰",
+        "symbol": "321370",
+        "buy_price": 1794,
+        "tp": 1917,
+        "sl": 1740,
+        "expected_profit": 6.86
     }
 ]
